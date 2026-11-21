@@ -110590,7 +110590,7 @@ window._kfzOn=1;
     /* ちびのまま (絵柄が混ざる・形が無い): chashitsu (正座)・odd1_blowpipe/cannon/dogsled/river/sling/wrestle (現地の人)・shikyu (投手と捕手) */
   };
   var K=5;            /* 絵の座標 1 あたりのドット。一枚絵は PC で幅 1000〜1400px (座標 1 = 4.5〜6px) なので、ほぼ画面の 1px = 1 ドット。2 だと胸の文字や柄が潰れた (11/21 松田さん) */
-  var POSE={ guts:"guts", bouquet:"bouquet", point:"point", up:"guts", banzai:"guts", hands:"guts", wave:"hat", bow:"bow", cry:"cry", cover:"cover", shake:"shake", sit:"sit" };
+  var POSE={ phone:"phone", guts:"guts", bouquet:"bouquet", point:"point", up:"guts", banzai:"guts", hands:"guts", wave:"hat", bow:"bow", cry:"cry", cover:"cover", shake:"shake", sit:"sit" };
   var on=function(){ try{ if(window.__ekForce&&window.kfxKit) return true; /* 検査の道具が絵だけ確かめる時 */ if(window._QAP||!window.kfxKit) return false; if(window.SMLIVE&&(SMLIVE.dead||(SMLIVE.on&&!SMLIVE.on()))) return false; return true; }catch(e){ return false; } };
   var N=0, REC={}, RECN=[];
   var wrap=function(){ try{
@@ -110657,6 +110657,11 @@ window._kfzOn=1;
     P("#16161c",3,8,6,14); P("#3a3a46",4,8,2,13); P("#d8b040",3,8,6,2);
     P("#22222a",1,0,10,9); P("#9aa0ac",2,1,8,7); P("#d8dce4",3,1,3,3); for(var k=0;k<4;k++) P("#6a7080",2+k*2,2+(k%2)*2,1,1);
     MIC=m.toDataURL(); return MIC; };
+  var PHONE=null;
+  var phoneUrl=function(){ if(PHONE) return PHONE; var m=document.createElement("canvas"); m.width=8; m.height=19; var x=m.getContext("2d");
+    var P=function(c,px,py,w,h){ x.fillStyle=c; x.fillRect(px,py,w,h); };
+    P("#14141a",0,0,8,19); P("#2c3040",1,1,6,17); P("#5a7090",1,2,6,12); P("#8aa8c8",2,3,2,4); P("#0c0c10",3,16,2,1);
+    PHONE=m.toDataURL(); return PHONE; };
   var load=function(u){ return new Promise(function(ok){ var i=new Image(); i.onload=function(){ ok(i); }; i.onerror=function(){ ok(null); }; i.src=u; }); };
   var pc=function(v,t){ return (v/t*100).toFixed(3)+"%"; };
 
@@ -110670,20 +110675,20 @@ window._kfzOn=1;
     var hDots=Math.round(45*S/0.9*K);
     var my0=(GM.team&&GM.team.players||[])[0];
     Promise.all(rec.map(function(r){
-      var pose=POSE[r.o.pose]||(r.o.expr==="cry"? "cry" : "stand");
+      var pose=POSE[r.o.pose]||(r.o.expr==="cry"? "cry" : "stand"); if(r.o.mic) pose="mic"; /* 97g123 マイクを前へ差し出す形 */
       var lead=(r.lead!=null)? r.lead : !!(r.p&&cast&&r.p===cast[0]&&!(KS[key]&&KS[key].aw));
       var dir=(lead&&pose!=="point")? "front" : "diag";
       if(r.mid){ pose="douage"; dir="side"; }
       var who=r.p||my0; if(!who) return Promise.resolve(null);
       var rs=(r.lead&&KS[key]&&KS[key].mv)? KS[key].mv : 1; /* 表彰式の MVP は台の上なので少し小さく (杯が横断幕にかからない) */
-      var opt={pose:pose, dir:dir, h:Math.round(hDots*rs), px:1}; if(r.staff){ opt.staff=r.staff; var si=rec.filter(function(q){ return q.staff; }).indexOf(r);
+      var opt={pose:pose, dir:dir, ppm:Math.round(45*S*K/1.8*rs), px:1}; if(r.staff){ opt.staff=(r.o.mic&&!r.p)? "press" : r.staff; /* マイクの人は記者 (97g123) */ var si=rec.filter(function(q){ return q.staff; }).indexOf(r);
         opt.owner={ name:key+"#"+si, id:"ek|"+key+"|"+si, age:(r.o.hair==="gray"||r.o.hairStyle==="bald")? 64 : (si? 46 : 54), female:!!r.o.female }; } /* 背広の人ごとに別の顔 */
       /* 背広の人: ちびの髪 (白髪 / 黒・茶) に合う顔が出るまで名前を変えて描かせる (顔は名前の種で決まる・年では髪の色は変わらない) */
       var want=(r.staff&&r.o)? ((/gray|white|silver/.test(String(r.o.hair||""))||r.o.hairStyle==="bald")? "gray" : (/black|brown/.test(String(r.o.hair||""))? "dark" : null)) : null;
       var tryOne=function(n){ var o2=opt; if(r.staff&&n>0) o2=Object.assign({}, opt, {owner:Object.assign({}, opt.owner, {name:opt.owner.name+"~"+n, id:opt.owner.id+"~"+n})});
-        return kfxKit.player(who, o2).then(function(img){ return img? load(img.url) : null; }).then(function(im){ if(!im) return null;
-          if(want&&n<5&&hairOf(im)!==want) return tryOne(n+1).then(function(v){ return v||{r:r, im:im, dir:dir}; });
-          return {r:r, im:im, dir:dir}; }); };
+        var img0=null; return kfxKit.player(who, o2).then(function(img){ img0=img; return img? load(img.url) : null; }).then(function(im){ if(!im) return null;
+          if(want&&n<5&&hairOf(im)!==want) return tryOne(n+1).then(function(v){ return v||{r:r, im:im, dir:dir, pts:img0&&img0.pts}; });
+          return {r:r, im:im, dir:dir, pts:img0&&img0.pts}; }); };
       return tryOne(0);
     })).then(function(out){
       if(root._ekDone) return; root._ekDone=1; clearTimeout(giveUp);
@@ -110693,10 +110698,10 @@ window._kfzOn=1;
         var r=v.r, im=v.im, d=pix(im), wU=im.width/K, hU=im.height/K, flip=(r.o.dir===-1&&v.dir!=="front");
         var left, top;
         var opt=KS[key]||{}; if(opt.behind&&r.y<=opt.behind.y) opt=Object.assign({}, opt, opt.behind); /* behind = 足もとが y 以下 (机の向こう) の人だけ沈めて切る */
-        if(r.mid){ left=r.x-wU/2; top=r.y-hU/2; } else { var fy=footOf(im,d); left=r.x-wU/2; top=r.y+(opt.sink||0)-(fy+1)/K; }
+        if(r.mid){ left=r.x-wU/2; top=r.y-hU/2; } else { var P0=v.pts||{}, fy=(P0.foot&&P0.foot[1]!=null)? P0.foot[1] : footOf(im,d); left=r.x-wU/2; top=r.y+(opt.sink||0)-(fy+1)/K; }
         var cut=(opt.clip!=null)? Math.max(0, (top+hU)-opt.clip) : 0;   /* 机の天板より下を切る */
         var box=document.createElement("div"); box.className="ekP"; box.style.cssText="position:absolute;left:"+pc(left,AW)+";top:"+pc(top,AH)+";width:"+pc(wU,AW)+";height:"+pc(hU,AH)+";opacity:0;transition:opacity .45s;pointer-events:none"+(flip? ";transform:scaleX(-1)" : "")+(cut>0? ";clip-path:inset(0 0 "+pc(cut,hU)+" 0)" : "");
-        if(r.troph&&window.awxTrophyCv){ var th=handOf(im,d,true); if(th){ try{ var tv=window.awxTrophyCv(r.troph, EVPX.Cv), tS=S*((r.troph==="mvp")? 0.5 : 0.6) /* ちびに合わせた大きさなので、頭身の高い選手には 6 割 (MVP の杯は 5 割) */, tw=tv.w*tS, thh=tv.h*tS, /* MVP の杯は大きいので横断幕にかからないよう小さく */ tu=tv.url();
+        if(r.troph&&window.awxTrophyCv){ var Pt=v.pts||{}, hR=Pt.handR, hL=Pt.handL, hh=(hR&&hL)? ((hR[1]<=hL[1])? hR : hL) : (hR||hL), th=hh? [hh[0], hh[1], (Pt.head? Pt.head[0] : im.width/2), hh[1]] : handOf(im,d,true); if(th){ try{ var tv=window.awxTrophyCv(r.troph, EVPX.Cv), tS=S*((r.troph==="mvp")? 0.5 : 0.6) /* ちびに合わせた大きさなので、頭身の高い選手には 6 割 (MVP の杯は 5 割) */, tw=tv.w*tS, thh=tv.h*tS, /* MVP の杯は大きいので横断幕にかからないよう小さく */ tu=tv.url();
             /* 握り方: タイトルのトロフィーは胴の真ん中を握る (拳が上から 6 割の所)。MVP の杯は片側の取っ手を握り、杯は頭の側へ張り出す。
                トロフィーは選手の後ろに置く → 拳と指が胴・取っ手に重なって握って見える */
             var fx=th[0]/K, fy=th[3]/K, tl, tt;
@@ -110704,8 +110709,12 @@ window._kfzOn=1;
             else { tl=fx-tw/2; tt=fy-thh*0.6; }
             var ti=document.createElement("img"); ti.src=tu; ti.alt=""; ti.style.cssText="position:absolute;image-rendering:pixelated;left:"+pc(tl,wU)+";top:"+pc(tt,hU)+";width:"+pc(tw,wU)+";height:"+pc(thh,hU)+(flip? ";transform:scaleX(-1)" : "");
             box.appendChild(ti); }catch(eT){ swl(eT); } } }
-        if(r.o.mic){ var h=handOf(im,d); if(h){ var mi=document.createElement("img"); mi.src=micUrl(); mi.alt="";
-            mi.style.cssText="position:absolute;image-rendering:pixelated;left:"+pc(h[0]/K-3,wU)+";top:"+pc(h[1]/K-6.5,hU)+";width:"+pc(6,wU)+";height:"+pc(11,hU)+";transform:rotate(24deg);transform-origin:50% 60%"; box.appendChild(mi); } }
+        /* マイク・電話: 返ってきた右手の点 (握る所) と握った物の向き gripR (度・右が 0・上が 90・左回り) に描く。絵は縦長 (上が頭) なので 90-g 度だけ右へ回す */
+        var Pm=v.pts||{}, held=(r.o.mic? "mic" : (r.o.pose==="phone"? "phone" : null));
+        if(held){ var hp=Pm.handR||Pm.handL, g=(Pm.handR? Pm.gripR : Pm.gripL); if(!hp){ var h0=handOf(im,d); if(h0) hp=h0; if(g==null) g=66; }
+          if(hp){ var hw=held==="mic"? 6 : 4.2, hh2=held==="mic"? 11 : 9.5, gy=held==="mic"? 0.7 : 0.5, it=document.createElement("img"); it.src=(held==="mic")? micUrl() : phoneUrl(); it.alt="";
+            it.style.cssText="position:absolute;image-rendering:pixelated;left:"+pc(hp[0]/K-hw/2,wU)+";top:"+pc(hp[1]/K-hh2*gy,hU)+";width:"+pc(hw,wU)+";height:"+pc(hh2,hU)+";transform:rotate("+(90-(g==null? 90 : g)).toFixed(1)+"deg);transform-origin:50% "+(gy*100)+"%";
+            box.appendChild(it); } }   /* 持ち物は選手の後ろ → 拳が重なって握って見える */
         var pi=document.createElement("img"); pi.src=im.src; pi.alt=""; pi.style.cssText="position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated"; box.appendChild(pi);
         el.parentNode.insertBefore(box, el.nextSibling);
         requestAnimationFrame(function(){ box.style.opacity="1"; });
@@ -112038,15 +112047,15 @@ window._kfzOn=1;
     if(!p) return Promise.resolve(null);
     var built=K.initFor(p, opt.with||null); if(!built) return Promise.resolve(null);
     var o=inPay(built.init.my,p); var lk=lookKey(o||{});
-    var key=[p.id, lk, opt.pose||"stand", opt.dir||"front", opt.h||160, opt.px||1, opt.t==null?"":opt.t, opt.with?opt.with.id:"", opt.cap||"", opt.staff||"", opt.owner? JSON.stringify(opt.owner) : ""].join("|");
+    var key=[p.id, lk, opt.pose||"stand", opt.dir||"front", opt.h||160, opt.px||1, opt.t==null?"":opt.t, opt.with?opt.with.id:"", opt.cap||"", opt.staff||"", opt.owner? JSON.stringify(opt.owner) : "", opt.ppm||""].join("|");
     var hit=K.img[key]; if(hit&&hit.ver===K.ver) return Promise.resolve(hit);
     var msg={type:"sm-kit-player", init:built.init, team:"my", pid:p.id, name:p.name, pose:opt.pose||"stand", dir:opt.dir||"front", h:opt.h||160, px:opt.px||1};
-    if(opt.elev!=null) msg.elev=opt.elev; if(opt.t!=null) msg.t=opt.t; if(opt.n) msg.n=opt.n; if(opt.cap) msg.cap=opt.cap;
+    if(opt.ppm){ msg.ppm=opt.ppm; if(!opt.h) delete msg.h; } /* 97g123 決まった縮尺 (1 m あたりのドット) → 背丈の差が出る */ if(opt.elev!=null) msg.elev=opt.elev; if(opt.t!=null) msg.t=opt.t; if(opt.n) msg.n=opt.n; if(opt.cap) msg.cap=opt.cap;
     if(opt.with){ msg.with={team:built.sameTeam?"my":"opp", pid:opt.with.id, name:opt.with.name}; }
     if(opt.owner){ try{ msg.init=Object.assign({}, msg.init, {my:Object.assign({}, msg.init.my, {owner:opt.owner})}); }catch(eO){} } /* 背広の人の顔: 名前と年で変わる */
     if(opt.staff){ msg.staff=opt.staff; delete msg.pid; delete msg.name; }
     return K.ask(msg, opt.ms).then(function(d){ if(!d||!d.ok){ note("ng", d&&d.why); return null; }
-      var r={url:d.url, w:d.w, h:d.h, frames:d.frames||null, who:d.who||null, ver:K.ver, why:d.why||""}; K.img[key]=r; return r; });
+      var r={url:d.url, w:d.w, h:d.h, frames:d.frames||null, who:d.who||null, ver:K.ver, why:d.why||"", pts:d.pts||null, pts2:d.pts2||null, height:d.height||null, clip:!!d.clip}; /* 97g123 体の点 (頭・足もと・手・握る向き) と背丈 */ K.img[key]=r; return r; });
   };
   K.stad=function(idx, time, opt){ opt=opt||{};
     var key=["stad",idx,time||"day",opt.w||1024,opt.h||576,opt.people?1:0,opt.fill==null?0.85:opt.fill].join("|");

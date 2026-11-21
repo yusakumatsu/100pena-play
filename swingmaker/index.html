@@ -478,7 +478,7 @@ body.ct-on.ct-all #ctChecks{top:calc(60px + var(--st))}
   </main>
 
   <aside class="panel" id="panel" data-state="collapsed" aria-label="調整">
-    <div class="handle" id="sheetHandle" role="button" aria-label="調整を開く"><span class="grip"></span><span class="ttl">調整 <small id="verTag" style="font-weight:600;letter-spacing:0;opacity:.6">版97g122</small></span></div>
+    <div class="handle" id="sheetHandle" role="button" aria-label="調整を開く"><span class="grip"></span><span class="ttl">調整 <small id="verTag" style="font-weight:600;letter-spacing:0;opacity:.6">版97g123</small></span></div>
       <div class="viewpill tabs" role="group" aria-label="view">
         <button data-view="3d" aria-pressed="false">3D</button>
         <button data-view="side" aria-pressed="false">横</button>
@@ -70608,6 +70608,129 @@ function cminSrc(src) { try { if (!CMIN.on || typeof document === 'undefined') r
    写しを使う時だけ、尾の ASCII でない字を \uXXXX の書き方に替える — 注の中は読まれず、字の並びや正規表現の中では同じ字。 */
 function cminTail(t) { try { if (!CMIN.txt || typeof t !== 'string') return t; return t.replace(/[\u0080-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')); } catch (e) { return t; } }
 // ==== /CMIN ====
+// ==== CHIDE BEGIN ==== (11/21 cardHide — 元は tools/cardhide/ch_block.js。python3 -I tools/cardhide/apply.py swing_demo.html で入れ直す。ページの中の塊を直接直さない)
+// 松田さん (11/21・版97g122 を遊んで)「ピッチャーの成績とかバッターの成績の項目、結構邪魔やね。バッターだったら、ボールを打って半俯瞰画面になった瞬間には、もう消えてるようにしたいね。
+//   ピッチャーに関しても、投球動作に入った時には消えるようにしてほしい。あと、左上とか右上の方にずらしたいね。」
+// 何を: ① 打者の札 (打者・次の打者・打席の頭の帯) は、打った球で中継の画が切り替わる時刻 tS の bOut 秒前から試合の時計で薄れ、tS のコマで 0。
+//         tS = 打つ番は当たった瞬間 (batFixOn が打者の後ろの画を離す時刻 ev.contact)・守る番は中継の切りの表 (bcastPlan) で当たった後に初めて来る打球を追う切り (塊 CL の flyKinds)。
+//         打球を追う画の間は塊 CL の body.cl-fly のまま (走者の札は残す)。次の球の支度 (prep・routine・aim) に戻ったら bIn 秒で出す (次の打席・ファウルの後の次の球)。
+//      ② 投手の札は、投手が投げる動きに入った時 (塊 PITCHI の aimHideMove — 的とゾーンを消す AIM_HIDE と同じ時刻: F.rel + pitchTimes(F).start = 足を上げ始める) から pOut 秒で薄れて消える。
+//         結果の間・牽制の間も出さない。次の球を選ぶ時 (aim)・次の球が来た時 (PLAY.base が替わった — 打つ番・おまかせ) に pIn 秒で出す。薄れ方は AIM_HIDE と同じ (画の時計・描かない間が gap 秒より空いたら今の形)。
+//      ③ 置き場: 打者の札の列は打者と反対の側 (11/15 夜の決まりのまま — 打つ番の右打者は画の左に立つので札は右・守る番は右打者が画の右に立つので札は左)、投手の札は打者の側へ分ける。
+//         どちらも画の上の端 = 点の札 (#pCount) の上の縁の高さから。点の札と同じ側はその下。前は投手の札が打者の札の下に並び、縦長では投手の横、横長では画の 1/3〜1/2 の高さまで下がっていた
+//         (上の端の板 SCB_TOP は 11/17 BSOFF から描かないのに、その高さ --uy の下に札を置いていた)。打席の前の大きい札が 1 枚だけの時は、その人の側の上。
+//         (11/21 同じ日・依頼主「ボールを投げる時に出てくる成績と選手がかぶってると、本当にげんなりするから、あそこかぶらないようにしてほしいな。」)
+//         札は選手 (投手・捕手・球審・打者 — 頭から足まで・バットと振りの帯) の四角に重ねない: 好みの角 → 反対の角 → 上の真ん中寄り → 小さく (0.82・0.68) → それでも駄目なら出さない (chPlace)。
+//         選手の四角は 0.2 秒ごとに この 1 コマの人の並び (塊 VOICE の VOICE.figs・VOICE.bat・VOICE.cam) から作る。
+//      投手の札は札の箱 (#uiyCard) の中に残したまま position:absolute で動かす — 札の箱を見るほかの塊 (PIX の皮・IU の段の落とし・WAFIX の畳み・吹き出しのよける物・名前のよける物) はそのまま働く。
+//      投手の札は 吹き出しのよける物 (TC_SAY_AVOID) に足す。球速の札・実況の枠 (11/20 wideFix) は .uiy-c をよけるので、動かした札もよける。
+// 見た目だけ: 札の中身・判定・物理・時刻は変えない。?chide=0 で全部前のまま・?chsplit=0 で置き場だけ前のまま・?chfade=0 で消し方だけ前のまま。
+// 重さ: 毎コマは数の比べと CSS の変数 (--chb・--chp) を濃さが 0.02 変わった時だけ書く (class は替えない — 塊 PIX の札の描き直しを起こさない)。置き場は 0.2 秒に 1 回と札を作り直した時だけ測る。
+const CH_Q = (() => { try { return new URLSearchParams(window.__TRIAL_Q || location.search); } catch (e) { return new URLSearchParams(''); } })();
+const CH_C = { on: CH_Q.get('chide') !== '0' ? 1 : 0, split: CH_Q.get('chsplit') !== '0' ? 1 : 0, fade: CH_Q.get('chfade') !== '0' ? 1 : 0,
+  bOut: 0.12, /* (打者の札: 切り替わりの何秒前から薄れるか — 試合の時計。振り出しから当たるまで 0.13 秒前後なので、振った後に薄れ始める) */ bIn: 0.1, pOut: 0.15, pIn: 0.1, /* (投手の札: AIM_HIDE の out / in と同じ) */ gap: 0.25,
+  step: 0.02, /* (濃さを書く刻み) */ tickMs: 100, /* (本描きが止まっている間に 置き場と濃さを決める間 ms) */ layMs: 100, /* (置き場を測る間 ms — 選手が動く・打者が打席に入る間も 0.1 秒で追う) */ pad: 6, /* (点の札・ほかの札との間 CSS px) */ top: 36, /* (点の札が無い時の上の端 CSS px — 前の札の上の端) */
+  obst: ['#pCount', '#pSide'], /* (よける DOM — 右上の点の札・守る番の左上のボタン) */
+  who: { P: 1, C: 1, U: 1 }, /* (よける選手: 投手・捕手・球審 (VOICE.figs の印) と打者 (VOICE.bat)) */ joints: ['head', 'neck', 'shoulderL', 'shoulderR', 'elbowL', 'elbowR', 'handL', 'handR', 'pelvis', 'hipL', 'hipR', 'kneeL', 'kneeR', 'toeL', 'toeR', 'heelL', 'heelR'],
+  keep: { pad: 4, BAT: [0.06, 0.06], P: [0.22, 0.12], def: [0.06, 0.04], swing: 0.5 }, /* (置き場を決める時に選手の四角を広げる割合 [横, 上] × その人の四角の高さ・打者の振りの帯の横 swing × 高さ) */
+  scales: [1, 0.82, 0.68], /* (選手に当たる時に札を小さくする段) */ slide: 0.06, /* (真ん中へ寄せる 1 段 × 画の幅) */ maxX: 0.62, /* (寄せる先の限り × 画の幅) */ maxY: 0.62, /* (札の下の縁の限り × 画の高さ) */
+  sideX: W => { try { const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--side')); return v > 0 && v < W.width / 4 ? v : 18; } catch (e) { return 18; } },
+  flyKinds: { half: 1, chase: 1, fielder: 1, runner: 1, base: 1, cthrow: 1, flag: 1, ump: 1, ground: 1, rundown: 1, hr: 1 } };
+const CH = { err: '', n: { b0: 0, p0: 0, lay: 0, split: 0, css: 0, size: 0, ovFix: 0, ovFix2: 0, gHide: 0, pHide: 0, gSmall: 0, pSmall: 0, gFlip: 0, pFlip: 0 }, gSide: null, bA: 1, pA: 1, bLast: 0, pS: { want: 1, a0: 1, at: 0, last: 0, hidBase: undefined }, tS: new WeakMap(), by: {}, set: { b: -1, p: -1 }, layAt: 0, lay: null, css: false };
+function chErr(e) { CH.err = String(e && e.stack || e).slice(0, 400); }
+function chGame(lay) { try { return CH_C.on && typeof PLAY !== 'undefined' && PLAY.on && typeof gameOn === 'function' && gameOn() && PLAY.game && !PLAY.game.over && (lay || !(typeof REPLAY !== 'undefined' && REPLAY.on)); } catch (e) { return false; } } /* (lay = 置き場: 振り返りの間も選手をよける。消し方は振り返りの間は前のまま) */
+// ---- ① 打者の札: 中継の画が打者の後ろ / 投手の後ろから切り替わる時刻 (試合の時計)。当たらない球・前に飛ばない球 (sw.batted 無し) は null ----
+function chSwitchT(sw) { if (!sw || !sw.ev || !sw.ev.contactMade || !sw.batted) return null; if (CH.tS.has(sw)) return CH.tS.get(sw); let v = null, keep = true;
+  try { const c = sw.ev.contact; if (PLAY.mode === 'bat' && typeof BAT_FIX !== 'undefined' && BAT_FIX.on) v = c; /* (打者の後ろの画は当たった瞬間に離れる — batFixOn) */
+    else if (typeof BCAST !== 'undefined' && BCAST.plans && BCAST.plans.has(sw)) { const S = bcastPlan(sw).segs, K = typeof CL_C !== 'undefined' && CL_C.flyKinds ? CL_C.flyKinds : CH_C.flyKinds; for (let i = 0; i < S.length; i++) { const e = i + 1 < S.length ? S[i + 1].t0 : 1e9; if (e <= c) continue; if (K[S[i].kind]) { v = Math.max(S[i].t0, c); break; } } }
+    else keep = false; /* (切りの表がまだ無い — 本描きが作ってから読む。作るのはこの塊ではしない) */ } catch (e) { v = null; chErr(e); }
+  if (keep) CH.tS.set(sw, v); return v; }
+function chBatTick(sw, t, now) { let tgt = 1; const ph = PLAY.phase;
+  if (!(ph === 'prep' || ph === 'routine' || ph === 'aim')) { const tS = chSwitchT(sw); if (tS != null && t >= tS - CH_C.bOut) tgt = Math.max(0, Math.min(1, (tS - t) / CH_C.bOut)); } /* (次の球の支度に入ったら出す — 前の球の振りが描かれていても) */
+  if (typeof CL !== 'undefined' && CL.fly) tgt = 0; /* (打球を追う画の間 — 塊 CL) */
+  const dt = (now - CH.bLast) / 1000; CH.bLast = now; if (dt > CH_C.gap || tgt <= CH.bA) CH.bA = tgt; else CH.bA = Math.min(tgt, CH.bA + dt / CH_C.bIn); return CH.bA; }
+// ---- ② 投手の札: AIM_HIDE と同じ時刻 (aimHideMove) で薄れる ----
+function chPitWant() { const ph = PLAY.phase, S = CH.pS; if (ph === 'aim') return 1; if (ph === 'result' || ph === 'pick') return 0;
+  let moved = false; if (ph === 'pitch') { try { moved = typeof aimHideMove === 'function' ? !!aimHideMove() : false; } catch (e) { moved = false; } } if (moved) return 0;
+  if (S.hidBase !== undefined && PLAY.base !== S.hidBase) return 1; /* (次の球が来た — 打つ番・おまかせの投げる番は aim を通らない) */ return S.want; }
+function chPitTick(now) { const S = CH.pS, n = now / 1000, w = chPitWant(); if (w === 0) S.hidBase = PLAY.base;
+  const cur = () => S.want ? Math.min(1, S.a0 + (n - S.at) / CH_C.pIn) : Math.max(0, S.a0 - (n - S.at) / CH_C.pOut);
+  if (n - S.last > CH_C.gap) { S.want = w; S.a0 = w; S.at = n; } else if (w !== S.want) { S.a0 = cur(); S.want = w; S.at = n; } S.last = n; return (CH.pA = cur()); }
+// ---- 濃さを札の箱に書く (CSS の変数と data- — class は替えない) ----
+function chApply(force) { const D = typeof UIY !== 'undefined' && UIY.dom; if (!D) return; const c = D.card, q = v => Math.round(v / CH_C.step) * CH_C.step, b = q(CH.bA), p = q(CH.pA); let flip = false;
+  if (force || b !== CH.set.b) { CH.set.b = b; c.style.setProperty('--chb', String(b)); const z = b <= 0 ? '1' : '0'; if (c.dataset.chb0 !== z) { c.dataset.chb0 = z; flip = true; if (z === '1') CH.n.b0++; } }
+  if (force || p !== CH.set.p) { CH.set.p = p; c.style.setProperty('--chp', String(p)); const z = p <= 0 ? '1' : '0'; if (c.dataset.chp0 !== z) { c.dataset.chp0 = z; flip = true; if (z === '1') CH.n.p0++; } }
+  if (flip) chLayout(true); /* (札が消えた / 出た時は列の大きさが変わる — すぐ置き直す) */ }
+function chFrame(sw, t, tm) { if (!CH_C.on) return; const now = performance.now(); if (!tm) { CH.frameAt = now; CH.sw = sw; CH.t = t; } try { if (CH_C.fade && chGame()) { chBatTick(sw, t, now); chPitTick(now); } else { CH.bA = 1; CH.pA = 1; CH.bLast = now; CH.pS.last = 0; } chApply(false); if (chSizeMoved() || (!tm && CH_C.split && chGame(true) && chOverlapNow().length)) { CH.n.ovFix += tm ? 0 : 1; chLayout(true); } else chLayout(false); } catch (e) { chErr(e); } } /* (毎コマ: 見えている札が今の選手の体に重なっていたら、そのコマで置き直す — 選手が動く・走る間も) */
+// 札の大きさが前に置いた時と違うか (塊 PIX が絵にし直した・大きい札に替わった) — 違えばそのコマで置き直す (前は 0.2 秒 前の大きさの所に出て、選手に重なるコマがあった)
+function chSizeMoved() { const D = typeof UIY !== 'undefined' && UIY.dom; if (!D || !CH.lay || D.card.hidden) return false; const c = D.card, p = c.querySelector(':scope > .uiy-pit'), pc = document.getElementById('pCount'), k = c.offsetWidth + 'x' + c.offsetHeight + '|' + (p ? p.offsetWidth + 'x' + p.offsetHeight : '-') + '|' + (pc && !pc.hidden && pc.offsetParent !== null ? pc.offsetTop + ',' + pc.offsetHeight + ',' + pc.offsetWidth : 'no'); /* (点の札が出た・消えた・動いた時も — 縦長で点の札が出る前に置いた札が点の札に重なったコマがあった) */ if (k === CH.szKey) return false; CH.szKey = k; CH.n.size++; return true; }
+// ---- ③ 置き場 ----
+// 打者の立つ画の側 ('L' / 'R')。打つ番 (打者の後ろの画): 右打者は左。守る番 (投手の後ろの画): 右打者は右。両打ちはその打席の振りの手 (塊 IU の iuSideRight と同じ読み方)
+function chBatScreen() { const P = (typeof state !== 'undefined' && state.swing && state.swing.params) || null, hand = P && P.hand === 'L' ? 'L' : 'R'; return PLAY.mode === 'pitch' ? hand : (hand === 'R' ? 'L' : 'R'); }
+function chSides() { const b = chBatScreen(), grp = b === 'L' ? 'R' : 'L'; return { grp, pit: grp === 'L' ? 'R' : 'L' }; }
+function chObst() { const L = []; for (const sel of CH_C.obst) { const el = document.querySelector(sel); if (!el || el.hidden || el.offsetParent === null) continue; const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || +cs.opacity === 0) continue; const r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4) continue; L.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom, tag: sel }); } return L; }
+// (11/21 依頼主「ボールを投げる時に出てくる成績と選手がかぶってると、本当にげんなりするから、あそこかぶらないようにしてほしいな。」)
+// この 1 コマの選手 (投手 P・捕手 C・球審 U・打者 BAT) の体の四角 (画面の座標)。頭のてっぺん (頭の点 + 0.14 m)・手・肘・肩・腰・膝・つま先・かかと・打者はバットの先と握り。
+//   keep = 札の置き場を決める時のよける形: 四角を CH_C.keep の割合だけ広げ、打者は振りの帯 (四角の高さの 25〜75% の高さを 横へ swing × 高さ) も足す。数える時 (chOverlapNow) は広げない。
+function chPeople(keep) { const out = []; try { if (typeof VOICE === 'undefined' || !VOICE.cam || !VOICE.cam.project || VOICE.cam.kind === 'ortho' || typeof view === 'undefined') return out; const cam = VOICE.cam, V = view.getBoundingClientRect(), W = VOICE.W || view.width, H = VOICE.H || view.height, sx = V.width / (W || 1), sy = V.height / (H || 1), K = CH_C.keep;
+    const one = (J, hand, tag, bat) => { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9, n = 0; const add = v => { if (!v) return; const q = cam.project(mirrorPoint(v, hand)); if (!q || !(q.z > 0.3)) return; x0 = Math.min(x0, q.x); x1 = Math.max(x1, q.x); y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y); n++; };
+      for (const nm of CH_C.joints) add(J[nm]); if (J.head) add([J.head[0], J.head[1] + 0.14, J.head[2]]); if (bat) { add(bat.tip); add(bat.knob); } if (n < 3) return;
+      const r = { left: V.left + x0 * sx - K.pad, top: V.top + y0 * sy - K.pad, right: V.left + x1 * sx + K.pad, bottom: V.top + y1 * sy + K.pad, tag }; out.push(r); if (!keep) return; const h = r.bottom - r.top, e = K[tag] || K.def;
+      r.left -= e[0] * h; r.right += e[0] * h; r.top -= e[1] * h; if (tag === 'BAT') out.push({ left: r.left - K.swing * h, right: r.right + K.swing * h, top: r.top + 0.25 * h, bottom: r.top + 0.75 * h, tag: 'SWING' }); };
+    for (const f of VOICE.figs || []) if (f && f.pose && f.pose.J && CH_C.who[f.tag]) one(f.pose.J, f.hand, f.tag, null);
+    if (VOICE.bat && VOICE.bat.J) one(VOICE.bat.J, VOICE.bat.hand, 'BAT', VOICE.rpose && VOICE.rpose.J === VOICE.bat.J ? VOICE.rpose.bat : null); } catch (e) { chErr(e); } return out; }
+function chHit(r, L) { for (const o of L) if (!(o.right <= r.left || o.left >= r.right || o.bottom <= r.top || o.top >= r.bottom)) return o; return null; }
+// 幅 w・高さ h (画面の点・大きさ 1) の札の置き場を探す: 大きさ s (CH_C.scales) ごとに、好みの側の角 → 反対の角 → 真ん中へ寄せた所 (両側を交互に)。上の端は y0 (点の札の上の縁)、点の札などに当たれば その下。
+//   選手のよける形 PK と よける板 F に当たらない最初の所。どこも駄目なら null (出さない)。
+function chPlace(w, h, pref, F, PK, W, sideX, y0) { const oth = pref === 'L' ? 'R' : 'L', step = Math.max(12, W.width * CH_C.slide), lim = W.top + W.height * CH_C.maxY;
+  for (const s of CH_C.scales) { const ws = w * s, hs = h * s; for (let i = 0; i < 12; i++) { const off = i * step; if (i && off + ws + sideX > W.width * CH_C.maxX) break;
+      for (const sd of [pref, oth]) { const x0 = sd === 'L' ? W.left + sideX + off : W.right - sideX - ws - off, x1 = x0 + ws; let y = y0;
+        for (let it = 0; it < 8; it++) { const o = chHit({ left: x0, right: x1, top: y, bottom: y + hs }, F); if (!o || o.top > lim) break; y = o.bottom + CH_C.pad; }
+        const r = { left: x0, right: x1, top: y, bottom: y + hs }; if (r.bottom > lim || chHit(r, F) || chHit(r, PK)) continue; return { sd, x0, y, s, off, w: ws, h: hs, r }; } } } return null; }
+function chUnsplit(c) { if (c.dataset.chsplit === '1') c.dataset.chsplit = '0'; for (const k of ['chgx', 'chpx']) if (c.dataset[k] === '1') c.dataset[k] = '0'; const st = c.style; for (const k of ['top', 'left', 'right', 'transform', 'transformOrigin']) if (st[k]) st[k] = ''; CH.gSide = null; CH.lay = null; }
+function chLayout(force) { const D = typeof UIY !== 'undefined' && UIY.dom; if (!D || !CH_C.on) return; const c = D.card, now = performance.now(); if (!force && now - CH.layAt < CH_C.layMs) return; CH.layAt = now;
+  try { if (!CH_C.split || c.hidden || !chGame(true) || typeof IU_C === 'undefined' || !IU_C.on || !IU_C.side.on) { chUnsplit(c); return; }
+    const wrap = c.parentNode, W = wrap.getBoundingClientRect(), sideX = CH_C.sideX(W), zoomed = document.body.classList.contains('wideplay') && !document.body.classList.contains('pix'), k = zoomed && typeof WIDE_PLAY !== 'undefined' ? (WIDE_PLAY.uiK || 1) : 1;
+    const pc = document.getElementById('pCount'), pr = pc && !pc.hidden && pc.offsetParent !== null ? pc.getBoundingClientRect() : null, y0 = pr && pr.height > 2 ? pr.top : W.top + CH_C.top, F = chObst(), PK = chPeople(true), S = chSides();
+    const bat = c.querySelector(':scope > .uiy-bat'), pit = c.querySelector(':scope > .uiy-pit'), split = !!(bat && pit); /* (打者の札と投手の札が並ぶ時だけ分ける — 大きい札が 1 枚の時は箱ごとその人の側へ) */
+    if ((c.dataset.chsplit === '1') !== split) { c.dataset.chsplit = split ? '1' : '0'; if (split) CH.n.split++; }
+    if (c.dataset.chgx === '1') c.dataset.chgx = '0'; if (c.dataset.chpx === '1') c.dataset.chpx = '0'; /* (出さない印を外してから測る — 外さないと大きさ 0 と測って、次の回に印を外して前の所に出していた (縦長で投手に重なった元)。同じ JS の中で付け直すので画には出ない) */
+    const gPref = bat ? S.grp : pit ? S.pit : S.grp, gw = c.offsetWidth * k, gh = c.offsetHeight * k; /* (箱の大きさ — 投手の札は position:absolute なので入らない。transform の前の大きさ) */
+    let G = gw > 1 && gh > 1 ? chPlace(gw, gh, gPref, F, PK, W, sideX, y0) : null; const gHide = !G && gw > 1 && gh > 1, vk = PLAY.mode + '/' + ((typeof BCAST !== 'undefined' && BCAST.cur && BCAST.cur.kind) || '-'); if (gHide) { CH.n.gHide++; CH.by[vk + ' 打者の札を出さない'] = (CH.by[vk + ' 打者の札を出さない'] || 0) + 1; }
+    if (!G) { const x0 = gPref === 'L' ? W.left + sideX : W.right - sideX - gw; G = { sd: gPref, x0, y: y0, s: 1, off: 0, w: gw, h: gh, r: { left: x0, right: x0 + gw, top: y0, bottom: y0 + gh } }; }
+    if (G.s < 1) { CH.n.gSmall++; CH.by[vk + ' 打者の札を小さく'] = (CH.by[vk + ' 打者の札を小さく'] || 0) + 1; } if (G.sd !== gPref) CH.n.gFlip++;
+    const z = gHide ? '1' : '0'; if (c.dataset.chgx !== z) c.dataset.chgx = z;
+    CH.gSide = G.sd; if (typeof iuSideApply === 'function') iuSideApply(); /* (札の箱の側 — 下の iuSideRight の包みが CH.gSide を返す) */
+    const st = c.style, R = G.sd === 'R', set = (k9, v) => { if (st[k9] !== v) st[k9] = v; };
+    set('top', Math.round((G.y - W.top) / k) + 'px'); if (R) { set('right', Math.round((W.right - G.x0 - G.w) / k) + 'px'); set('left', ''); } else { set('left', Math.round((G.x0 - W.left) / k) + 'px'); set('right', ''); }
+    set('transform', G.s < 1 ? 'scale(' + G.s + ')' : ''); set('transformOrigin', G.s < 1 ? (R ? 'top right' : 'top left') : '');
+    let P = null; if (split && pit.offsetWidth > 0) { const pw = pit.offsetWidth * k, ph = pit.offsetHeight * k, Fp = gHide ? F : F.concat([Object.assign({ tag: 'group' }, G.r)]), Q = chPlace(pw, ph, S.pit, Fp, PK, W, sideX, y0), pHide = !Q; if (pHide) { CH.n.pHide++; CH.by[vk + ' 投手の札を出さない'] = (CH.by[vk + ' 投手の札を出さない'] || 0) + 1; }
+      const zp = pHide ? '1' : '0'; if (c.dataset.chpx !== zp) c.dataset.chpx = zp;
+      if (Q) { const sc = G.s, ty = Math.round((Q.y - G.y) / (sc * k)), sp = String(+(Q.s / sc).toFixed(3)), o9 = R ? 'top right' : 'top left';
+        /* (箱の中の座標: 箱の上の縁から・箱の動かない側の縁から — 箱の幅が変わっても投手の札は動かない。箱の transform の分で割る) */ const bx = R ? Math.round((G.x0 + G.w - Q.x0 - Q.w) / (sc * k)) : Math.round((Q.x0 - G.x0) / (sc * k));
+        const sv = (k9, v) => { if (st.getPropertyValue(k9) !== v) st.setProperty(k9, v); }; sv('--chpt', ty + 'px'); sv('--chpl', R ? 'auto' : bx + 'px'); sv('--chpr', R ? bx + 'px' : 'auto'); sv('--chps', sp); sv('--chpo', o9);
+        P = { side: Q.sd, x: Math.round(Q.x0 - W.left), y: Math.round(Q.y - W.top), w: Math.round(Q.w), h: Math.round(Q.h), s: Q.s, off: Math.round(Q.off) }; if (Q.s < 1) { CH.n.pSmall++; CH.by[vk + ' 投手の札を小さく'] = (CH.by[vk + ' 投手の札を小さく'] || 0) + 1; } if (Q.sd !== S.pit) CH.n.pFlip++; } }
+    else if (!split && c.dataset.chpx === '1') c.dataset.chpx = '0';
+    CH.lay = { side: G.sd, x: Math.round(G.x0 - W.left), top: Math.round(G.y - W.top), w: Math.round(G.w), h: Math.round(G.h), s: G.s, off: Math.round(G.off || 0), hide: gHide, split, pit: P, ppl: PK.length }; CH.n.lay++; } catch (e) { chErr(e); } }
+// 数える: 今 見えている札 (濃さ 0.05 より上) と選手の体の四角 (広げない) が重なっているか — 検査の道具 (tools/cardhide/ov_count.js) は塊の無い前の本体でも同じ式で数える
+function chOverlapNow() { const P = chPeople(false).concat(chObst()), out = []; /* (選手と、点の札・左上のボタン) */ for (const e of document.querySelectorAll('#uiyCard > .uiy-c')) { const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity <= 0.05) continue; const r = e.getBoundingClientRect(); if (r.width < 2 || r.height < 2) continue; const o = chHit(r, P); if (o) out.push([e.className.split(' ')[1] || '', o.tag]); } return out; }
+// 札の箱の側: chLayout が決めた側 CH.gSide (打者の札があれば打者と反対の側・投手の大きい札だけなら打者の側 — 選手に当たる時は反対の側もある) (塊 IU の iuSideRight を包む)
+if (typeof iuSideRight === 'function' && !iuSideRight._ch) { const f0 = iuSideRight; iuSideRight = function () { try { if (CH_C.on && CH_C.split && chGame(true) && CH.gSide && IU_C.on && IU_C.side.on) return CH.gSide === 'R'; } catch (e) { chErr(e); } return f0.apply(this, arguments); }; iuSideRight._ch = 1; }
+if (typeof uiCardSync === 'function' && !uiCardSync._ch) { const f0 = uiCardSync; uiCardSync = function () { const r = f0.apply(this, arguments); try { if (CH_C.on) { chApply(true); chLayout(true); if (typeof queueMicrotask === 'function') queueMicrotask(() => { try { chLayout(true); } catch (e) { chErr(e); } }); } } catch (e) { chErr(e); } return r; }; /* (塊 PIX が札を絵にするのは中身を書いた後の小さな仕事 — その後でもう 1 回置く) */ uiCardSync._ch = 1; }
+if (typeof miniDiaTick === 'function' && !miniDiaTick._ch) { const f0 = miniDiaTick; miniDiaTick = function (sw, t) { try { chFrame(sw, t); } catch (e) { chErr(e); } return f0.apply(this, arguments); }; miniDiaTick._ch = 1; } /* (本描きの直後に 1 コマ 1 回 — 塊 CL の包みの外。CL.fly は CL の包みの中で決まるので、この包みは 1 コマ遅れて読む: 薄れはその前に 0 になっている) */
+try { if (CH_C.on && typeof setInterval === 'function') CH.timer = setInterval(() => { try { if (performance.now() - (CH.frameAt || 0) > CH_C.tickMs * 1.5) chFrame(CH.sw, CH.t, true); } catch (e) { chErr(e); } }, CH_C.tickMs); } catch (e) { chErr(e); } /* (本描きの口 (miniDiaTick) が呼ばれない間 — 場面の切り・打者が入る寄り・次の球の支度の一部 — も 0.1 秒ごとに置き場と濃さを決める) */
+if (typeof playOverlay === 'function' && !playOverlay._ch) { const f0 = playOverlay; playOverlay = function () { const r = f0.apply(this, arguments); try { if (CH_C.on && CH_C.split && chGame(true) && CH.lay && chOverlapNow().length) { CH.n.ovFix2++; chLayout(true); } } catch (e) { chErr(e); } return r; }; playOverlay._ch = 1; } /* (画の上に描いた後 — 塊 VOICE がこのコマのカメラ VOICE.cam を入れた後にも重なりを見る: 中継の切りが替わったコマ) */
+try { if (CH_C.on && typeof TC_SAY_AVOID !== 'undefined' && TC_SAY_AVOID.indexOf('.uiy-pit') < 0) TC_SAY_AVOID.push('.uiy-pit'); } catch (e) { chErr(e); } /* (吹き出しが投手の札をよける — 札の箱の四角の外に出したので) */
+const CH_CSS = [
+  '#uiyCard>.uiy-bat,#uiyCard>.uiy-strip{opacity:var(--chb,1)}#uiyCard>.iu-next{opacity:calc(.92 * var(--chb,1))}#uiyCard>.uiy-pit{opacity:var(--chp,1)}',
+  '#uiyCard[data-chb0="1"]>.uiy-bat,#uiyCard[data-chb0="1"]>.iu-next,#uiyCard[data-chb0="1"]>.uiy-strip,#uiyCard[data-chp0="1"]>.uiy-pit{display:none!important}', /* (0 になったら外す — 球速の札・実況の枠・吹き出しがよけなくてよい) */
+  '#uiyCard[data-chsplit="1"]>.uiy-pit{position:absolute;left:var(--chpl,auto);right:var(--chpr,auto);top:var(--chpt,0px);margin:0;transform:scale(var(--chps,1));transform-origin:var(--chpo,top left)}',
+  '#uiyCard[data-chgx="1"]>.uiy-c:not(.uiy-pit),#uiyCard[data-chgx="1"]:not([data-chsplit="1"])>.uiy-pit,#uiyCard[data-chpx="1"][data-chsplit="1"]>.uiy-pit{display:none!important}' /* (選手に当たらない所が無い時は出さない) */
+].join('\n');
+function chCss() { if (CH.css || typeof document === 'undefined' || !document.head) return; CH.css = true; try { const st = document.createElement('style'); st.id = 'chCss'; st.textContent = CH_CSS; document.head.appendChild(st); CH.n.css++; } catch (e) { chErr(e); } }
+try { if (CH_C.on) chCss(); } catch (e) { chErr(e); }
+function chInfo() { let tS = null; try { tS = CL && CL.sw ? chSwitchT(CL.sw) : null; } catch (e) { tS = null; } return { on: CH_C.on, split: CH_C.split, fade: CH_C.fade, err: CH.err, n: Object.assign({}, CH.n), by: Object.assign({}, CH.by), bA: +CH.bA.toFixed(3), pA: +CH.pA.toFixed(3), lay: CH.lay, tS, side: (() => { try { return chSides(); } catch (e) { return null; } })() }; }
+// ==== /CHIDE ====
 // ==== INTROLEN (11/15 夕 調整役: 試合が始まる前の球場の全景を 2.8 秒 → 5.6 秒 (松田さん「今の倍ぐらいでいいかもしれない」)・?introlen=<秒>・元は tools/introlen/apply.py) ====
 var INTRO_LEN = { ms: 5600, def: 2800 };
 function introLenMs() { try { const q = new URLSearchParams(window.__TRIAL_Q || location.search).get('introlen'); if (q != null && q !== '' && isFinite(+q)) return +q > 0 ? Math.round(+q * 1000) : INTRO_LEN.def; } catch (e) { } return INTRO_LEN.ms; }
@@ -73410,6 +73533,36 @@ if (BBODY_C.on && typeof gameLook0 === 'function') { const l0 = gameLook0; gameL
   const sp = state.params; state.params = BBODY.base0 || (BBODY.base0 = defaultParams()); try { return l0.apply(this, arguments); } finally { state.params = sp; } }; }
 if (typeof window !== 'undefined') window.BBODY = BBODY;
 // ==== /BBODY ====
+// ==== PENANO BEGIN ==== (11/21 penaA45: 100ペナの背番号 no を、試合と部品の枠の全部の所で同じ番号に。元は tools/penano/penano_block.js → python3 -I tools/penano/apply.py swing_demo.html)
+/* いつ・なぜ (100ペナ TO_SWINGMAKER_20261119.md の A4 — 11/21 から打者・投手・控え・ブルペンの全員に no (0〜99) を送る。「1 番の野手が試合では 82 番・11 番の投手が 67 番・
+     部品の枠で同じ人を 3 回頼むと 68・67・68 と揺れた」):
+     名簿の受け口 (PENAX の penaTeam) は前から no を読んでいたが、次の 3 つで番号がずれた (tools/pena/no_probe.js・tools/smkit/kitno_probe.js で数えた):
+     ・指名打者なしの試合では、先発投手が打順 (9 番) と投手の 2 か所にいる。2 か所目を「同じ球団で番号が重なった」として名前と pid から作り直していた
+       → 打つ時と投げる時で番号が違い、部品の枠では構え (打順の人) と立ち・足上げ (投手) で揺れた (no なしでも 27 / 28 のように)。同じ人 (同じ key) は 1 つの番号にする
+     ・守る番の画の打者 (投げる番に向かう相手の打者) は、顔の指定 face100 が名簿の物と別の写しで、名簿を引けず (PENAX.byF は物で引く) 背丈の種の番号になった (6 番が 2 番 など)。
+       名前#pid (face100 の nm) と球団で引き直す
+     ・打順の人の params.uniNum は、100ペナの試合では作らなかった (gameUniNum が penaOn で戻る) ので、lookFor の番号を直に読む所 (応援の幕とタオル fbanTeam・家族のユニフォーム nickFamSpec)
+       が背丈の種の番号になった。打順の人の uniNum を名簿の番号にする
+   重なった時 (同じ球団で別の人が同じ no — 100ペナ側の不具合) は前のまま: 先の人がその番号、後の人は名前と pid から (PENAX の決め方)。
+   no が 0 の時: 守る人の番号 (defMen の num) を '0' の字にする (捕手の背番号を「num があれば」で読む所が 0 を無しと読んだ)。?penano=0 で前のまま */
+const PENANO = { on: (() => { try { return new URLSearchParams(window.__TRIAL_Q || location.search).get('penano') !== '0'; } catch (e) { return true; } })(), n: { same: 0, nm: 0, uni: 0, zero: 0 }, err: '', nmMap: null, nmLive: null };
+function penanoErr(e) { PENANO.err = String(e && e.stack || e).slice(0, 300); }
+// 同じ人 (key = (bn || 名前) + '#' + pid) が名簿の 2 か所にいる時は 1 つの番号: 送られた no のとおりの方 (無ければ先の方) の番号に揃える
+function penanoSame(T) { const by = {}; for (const r of T.all || []) { if (!r || !r.key) continue; (by[r.key] || (by[r.key] = [])).push(r); }
+  for (const k in by) { const L = by[k]; if (L.length < 2) continue; const sent = r => { const v = r.src && r.src.no != null && r.src.no !== '' ? +r.src.no : NaN; return isFinite(v) ? v : null; }, pick = L.find(r => sent(r) != null && sent(r) === r.no) || L[0];
+    for (const r of L) if (r.no !== pick.no) { r.no = pick.no; PENANO.n.same++; } } }
+if (typeof penaTeam === 'function') { const t0 = penaTeam; penaTeam = function (t, team) { const T = t0.apply(this, arguments); try { if (PENANO.on && T) penanoSame(T); } catch (e) { penanoErr(e); } return T; }; }
+// 顔の指定の写し (物が違う) から名簿の人を引く: 名前#pid と球団の名前 (face100Norm の nm・team) で
+function penanoRecOfF(f) { const L = PENAX.live; if (!L || !f || !f.nm) return null; if (PENANO.nmLive !== L) { PENANO.nmLive = L; PENANO.nmMap = new Map(); for (const t of ['my', 'opp']) { const T = L.I[t]; if (!T) continue; for (const r of T.all.concat(T.staff || [])) if (r && r.f100 && r.f100.nm) { const k = r.f100.team + '|' + r.f100.nm; if (!PENANO.nmMap.has(k)) PENANO.nmMap.set(k, r); } } }
+  return PENANO.nmMap.get(f.team + '|' + f.nm) || null; }
+if (typeof penaLookIn === 'function') { const l0 = penaLookIn; penaLookIn = function (look, params) { const r0 = l0.apply(this, arguments); if (r0 || !PENANO.on) return r0;
+    try { const f = params && params.face100; if (!look || !f || !f._f100 || !f.nm) return r0; const r = penanoRecOfF(f); if (!r || r.from === 'staff') return r0; PENANO.n.nm++; return { look: Object.assign({}, look, { num: String(r.no), sename: r.se || '' }), params }; } catch (e) { penanoErr(e); return r0; } }; }
+// 打順の人の uniNum = 名簿の番号 (100ペナの試合だけ。名簿にいない人は今まで通り)
+if (typeof gameUniNum === 'function') { const u0 = gameUniNum; gameUniNum = function (G, team, k, P) { const r9 = u0.apply(this, arguments);
+    try { if (PENANO.on && P && G && typeof penaOn === 'function' && penaOn()) { const e = G.lineup && G.lineup[team] && G.lineup[team][k], nm = (e && e.name) || (typeof gameName === 'function' ? gameName(team, k) : ''), r = penaRecOf(team, nm); if (r && r.no != null) { P.uniNum = r.no; PENANO.n.uni++; } } } catch (e) { penanoErr(e); } return r9; }; }
+// 守る人の番号 0 は字の '0' に (「num があれば」で読む所が 0 を無しと読まないように)
+if (typeof penaDefMan === 'function') { const d0 = penaDefMan; penaDefMan = function (m) { const r9 = d0.apply(this, arguments); try { if (PENANO.on && m && m.num === 0) { m.num = '0'; PENANO.n.zero++; } } catch (e) { penanoErr(e); } return r9; }; }
+// ==== /PENANO ====
 // ==== SMKIT BEGIN ==== (11/20 Mac smKit: 100ペナの画面に「選手 1 人の絵」と「試合前の球場の 1 枚」を返す部品の口。?kit=1 の時だけ働く。元は tools/smkit/smkit_block.js → python3 -I tools/smkit/apply.py swing_demo.html)
 /* いつ・なぜ (100ペナ TO_SWINGMAKER_20261119.md の D 節・PLAN_20261117_next.md の 1・4・5・6 節):
      100ペナはイベントの一枚絵・練習の画面・エディットの見本に「試合と同じ選手」を、ペナントの画面と試合の入口に「写りのいい球場」を出したい。
@@ -73425,7 +73578,7 @@ const SMKIT_C = { api: 1, on: (() => { try { return new URLSearchParams(window._
   dirs: { front: 0, diag: 45, side: 90, back: 180, '前': 0, '斜め': 45, '横': 90, '後ろ': 180 },
   hDef: 160, hMin: 24, hMax: 1024, pxMax: 8, fill: 0.9, padW: 0.07, lens: 6, elev: 8, wMin: 0.3, wMax: 1.6, /* 選手: 既定の縦の点・最小・最大・1 点の大きさの上限・縦に占める割合・横の余白 (縦の点に対して)・レンズ (焦点 = 縦の点 × lens: 長いほど歪まない)・見下ろす角度 (度)・横の点の幅 (縦に対して) */
   stad: { w: 1024, h: 576, wMax: 2400, u: 0.75, waitMs: 30000, imgMs: 4000, stepMs: 40, pumpMs: 120 }, /* 球場: 既定の大きさ・最大・全景のカメラの回り具合 (試合開始の 0〜1 のどこか・0.75 = 球場が真ん中に大きく)・GPU の球場が出来るまで待つ上限・遠景の絵を待つ上限・待つ刻み・GPU の球場を 1 回に組み立てる ms (試合は 8) */
-  workMs: 60000, cacheN: 32 }; /* worker で打者を作るのを待つ上限・作った打者 (振りの絵 1 人 約 1 MB) と投手の画を持つ数 (超えたら古い半分を手放す) */
+  workMs: 60000, cacheN: 32, ppmMin: 8, ppmMax: 2048, ppmTop: 600, ppmPad: 0.06 }; /* (11/21 kitPoints: ppm の下限・絵の縦横の上限・ppm の上限・決まった縮尺の時の余白 (m)) */ /* worker で打者を作るのを待つ上限・作った打者 (振りの絵 1 人 約 1 MB) と投手の画を持つ数 (超えたら古い半分を手放す) */
 const SMKIT = { ready: false, stop: false, sig: '', q: Promise.resolve(), w: null, wid: 0, wait: new Map(), built: new Map(), cv: null, cv2: null, n: { player: 0, stad: 0, built: 0, err: 0 }, last: null, err: '', inject: null };
 function smkitErr(where, e) { SMKIT.n.err++; SMKIT.err = where + ': ' + String(e && e.stack || e).slice(0, 300); }
 // ---- 部品の枠では試合も編集も動かさない (?kit=1 の時だけ) ----
@@ -73443,7 +73596,7 @@ if (typeof dotScale === 'function') { const d0 = dotScale; dotScale = function (
 if (typeof crewFigures === 'function') { const c0 = crewFigures; crewFigures = function (swing) { if (SMKIT.inject) return { F: fieldPlan(swing), figs: SMKIT.inject.slice() }; return c0.apply(this, arguments); }; } /* (立ち・座り: 作った 1 人だけを守備の人の道で描く) */
 // ---- 読み込み: 最初の打者が出来たら時計を止めて、親に知らせる ----
 function smkitPost(o) { try { (window.parent && window.parent !== window ? window.parent : window).postMessage(o, '*'); } catch (e) { smkitErr('post', e); } }
-function smkitInfo() { return { type: 'sm-kit-hello', engine: 'swing-maker', api: SMKIT_C.api, ver: typeof piVer === 'function' ? String(piVer()).split('・')[0] : '', ok: SMKIT.ready, poses: ['stance', 'kick', 'stand', 'sit'], events: ['bow', 'shake', 'douage', 'bouquet', 'cry', 'cover', 'point', 'shoulder', 'guts', 'hat'], practice: ['cage', 'swing', 'pen', 'knock'], staff: ['mgr', 'coach', 'bat', 'pit', 'def', 'data', 'bpc', 'owner'], dirs: ['front', 'diag', 'side', 'back'], stadN: typeof STADIUMS !== 'undefined' ? STADIUMS.length : 0, times: ['day', 'dusk', 'night'], stads: smkitStadTimes() }; }
+function smkitInfo() { return { type: 'sm-kit-hello', engine: 'swing-maker', api: SMKIT_C.api, ver: typeof piVer === 'function' ? String(piVer()).split('・')[0] : '', ok: SMKIT.ready, poses: ['stance', 'kick', 'stand', 'sit'], events: ['bow', 'shake', 'douage', 'bouquet', 'cry', 'cover', 'point', 'shoulder', 'guts', 'hat', 'phone', 'mic'], practice: ['cage', 'swing', 'pen', 'knock'], staff: ['mgr', 'coach', 'bat', 'pit', 'def', 'data', 'bpc', 'owner', 'press'], dirs: ['front', 'diag', 'side', 'back'], stadN: typeof STADIUMS !== 'undefined' ? STADIUMS.length : 0, times: ['day', 'dusk', 'night'], stads: smkitStadTimes() }; }
 // 球場ごとの時刻: 時刻の決まった球場 (遠景の表 STAD_FAR の time) はその時刻だけ — 頼んだ時刻と違えば返事の time が球場の時刻になる
 function smkitStadTimes() { const out = []; try { for (let i = 0; i < STADIUMS.length; i++) { const S = typeof stadFarOf === 'function' ? stadFarOf(STADIUMS[i].name) : null; out.push({ i, name: STADIUMS[i].name, times: S && S.time && S.time.length ? S.time.slice() : ['day', 'dusk', 'night'] }); } } catch (e) { smkitErr('times', e); } return out; }
 function smkitBoot() { if (!SMKIT_C.on || SMKIT.ready) return; let n = 0; const go = () => { if (typeof state === 'undefined' || !state.swing || typeof PLAY === 'undefined' || typeof penaInit !== 'function') { if (++n < 1200) setTimeout(go, 50); return; }
@@ -73510,6 +73663,40 @@ function smkitCam(pts, front, chest, yaw, elev, h, wIn, upH) { const C = SMKIT_C
     const sc = Math.min(C.fill * h / Math.max(1, b1 - b0), wIn ? (1 - 2 * C.padW) * w / Math.max(1, a1 - a0) : (C.wMax - 2 * C.padW) * h / Math.max(1, a1 - a0)); /* (横に長い形 (胴上げ) は横の上限に収める) */ dist /= sc; cx += w / 2 - (a0 + a1) / 2; cy += h / 2 - (b0 + b1) / 2;
     if (!wIn && it === 1) { const nw = Math.round(clamp((a1 - a0) * sc + 2 * C.padW * h, C.wMin * h, C.wMax * h) / 2) * 2; cx += (nw - w) / 2; w = nw; } }
   return smkitPCam(V.add(c, V.mul(d3, dist)), V.mul(d3, -1), f, w, h, cx, cy, upH); }
+// (11/21 kitPoints — 100ペナ「背丈が分かるように」) 決まった縮尺のカメラ: ppm = 1 m あたりのドット (体の真ん中の奥行きで)。向きは smkitCam と同じ (前 = 顔の向く方から yaw 度・elev 度見下ろす)。
+//   レンズは縮尺に合わせて長さを決める (焦点 = lens × 2 × ppm — 2 m の人が縦いっぱいの時と同じ歪み・カメラは体から 12 m)。
+//   hFix (縦の点) があれば、体の一番下 (足もと) を下の余白の上に揃え、背の高い人ほど上へ伸びる (上にはみ出したら cam.clip)。無ければ体が収まる大きさ。
+//   upH (転がしたカメラ — 胴上げの斜め・横・前) の時は、出来た絵を 90° 回すので、hFix は回した後の縦 = カメラの横の点
+function smkitCamPpm(pts, front, chest, yaw, elev, ppm, hFix, wFix, upH) { const C = SMKIT_C, fN = V.norm([front[0], 0, front[2]]), rt = [-fN[2], 0, fN[0]];
+  let sd = rt; if (chest) { const c = V.norm([chest[0], 0, chest[2]]), d = c[0] * rt[0] + c[2] * rt[2]; if (Math.abs(d) > 0.2 && d < 0) sd = [-rt[0], 0, -rt[2]]; }
+  const a = yaw * Math.PI / 180, e = elev * Math.PI / 180, dh = V.norm([fN[0] * Math.cos(a) + sd[0] * Math.sin(a), 0, fN[2] * Math.cos(a) + sd[2] * Math.sin(a)]), d3 = [dh[0] * Math.cos(e), Math.sin(e), dh[2] * Math.cos(e)];
+  let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity; for (const p of pts) { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); z0 = Math.min(z0, p[2]); z1 = Math.max(z1, p[2]); }
+  const c = [(x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2], f = C.lens * 2 * ppm, pos = V.add(c, V.mul(d3, f / ppm)), cam0 = smkitPCam(pos, V.mul(d3, -1), f, 100, 100, 0, 0, upH);
+  let a0 = Infinity, b0 = Infinity, a1 = -Infinity, b1 = -Infinity; for (const p of pts) { const q = cam0.project(p); a0 = Math.min(a0, q.x); a1 = Math.max(a1, q.x); b0 = Math.min(b0, q.y); b1 = Math.max(b1, q.y); }
+  const pad = Math.max(2, Math.round(ppm * C.ppmPad)), lim = v => Math.round(clamp(v, 8, C.ppmMax)); let w, h, cx, cy;
+  if (upH) { w = lim(hFix || a1 - a0 + 2 * pad); h = lim(b1 - b0 + 2 * pad); cx = w / 2 - (a0 + a1) / 2; cy = pad - b0; }
+  else { h = lim(hFix || b1 - b0 + 2 * pad); w = lim(wFix || a1 - a0 + 2 * pad); cx = w / 2 - (a0 + a1) / 2; cy = hFix ? h - pad - b1 : pad - b0; }
+  const cam = smkitPCam(pos, V.mul(d3, -1), f, w, h, cx, cy, upH); cam.ppm = ppm; cam.clip = upH ? a1 - a0 > w : b0 + cy < 0 || a1 - a0 > w; return cam; }
+// (11/21 kitPoints — 100ペナ「トロフィー・マイク・優勝杯を手に持たせたい」) 体の点を返す絵の中のドット [x, y] (左上が 0・px 倍した後・90° 回した後):
+//   head 頭のてっぺん (描いた絵の帽子・髪の一番上 — 頭の真ん中から頭の上の向きへ絵が続く所まで)・foot 足もと (地面に着いている足の裏 — x は着いている足の真ん中・y は一番下)・handR / handL 握る所 (手首→握り拳の 0.6 — 拳の真ん中)・
+//   gripR / gripL 握った物が向く角度 (度・画の右が 0・上が 90・左回り — 拳を通る棒の向き: 形が決めた向き (電話・マイク) か、体の上の向きの前腕に直角な分)・armR / armL 前腕の向き (肘→手首・同じ角度の決め方)
+//   左打者・左投手の絵は鏡なので、骨の右と左を入れ替えて「その人の右手・左手」で返す
+function smkitBodyPts(J, D, hand, cam, px, rot, grip, cv) { if (!J || !J.head || !cam) return null; const sc = Math.max(1, Math.min(SMKIT_C.pxMax, Math.round(px || 1))), W0 = cam.w * sc, H0 = cam.h * sc, k = (D && D.k) || 1, r1 = v => Math.round(v * 10) / 10;
+  const tr = p => { const q = cam.project(mirrorPoint(p, hand)); let x = q.x * sc, y = q.y * sc; if (rot > 0) { const x2 = H0 - y; y = x; x = x2; } else if (rot < 0) { const x2 = y; y = W0 - x; x = x2; } return [x, y]; };
+  const ang = (a, b) => { const p = tr(a), q = tr(b); return Math.round(Math.atan2(p[1] - q[1], q[0] - p[0]) * R2D); };
+  const up = V.norm(V.sub(J.head, J.neck)), top = V.add(J.head, V.mul(up, CONFIG.body.radius.head * k * 1.3)), ft = ['toeL', 'heelL', 'toeR', 'heelR'].map(n => J[n]).filter(Boolean), fy0 = ft.length ? Math.min(...ft.map(p => p[1])) : 0, fg = ft.filter(p => p[1] < fy0 + 0.06 * k); /* (足もと: 地面に着いている足のつま先とかかと (一番低い所から 6 cm 以内) — 足を上げた足上げ・ノックは軸足だけ) */
+  const body = V.norm(V.sub(J.neck, J.pelvis)), fw = J.shoulderL && J.shoulderR ? V.norm(V.cross(V.sub(J.shoulderL, J.shoulderR), V.sub(J.neck, J.pelvis))) : [1, 0, 0];
+  const one = s => { const wr = J['wrist' + s], hd = J['hand' + s], el = J['elbow' + s]; if (!wr || !hd) return null; const c = V.lerp(wr, hd, 0.6), d = V.norm(V.sub(hd, wr)), perp = g => V.sub(g, V.mul(d, V.dot(g, d)));
+    let g = grip && grip[s] ? grip[s] : perp(body); if (!(grip && grip[s]) && V.len(g) < 0.3) g = perp(fw); if (V.len(g) < 0.1) g = perp([0, 1, 0]); g = V.norm(g); const P = tr(c);
+    return { at: [r1(P[0]), r1(P[1])], grip: ang(c, V.add(c, V.mul(g, 0.12 * k))), arm: el ? ang(el, wr) : null }; };
+  let T = tr(top); let Fo = tr(J.pelvis); if (fg.length) { const q9 = fg.map(tr); Fo = [q9.reduce((s9, q) => s9 + q[0], 0) / q9.length, q9.reduce((s9, q) => s9 + q[1], 0) / q9.length]; if (!rot) Fo[1] = Math.max(...q9.map(q => q[1])); } /* (x は着いている足の真ん中・y は一番下 (画の下の縁に近い方) — 奥の足と手前の足で地面の高さが画の上でずれるので、手前の足の裏に合わせる) */
+  if (cv && cv.width === cam.w && cv.height === cam.h) { try { /* (頭のてっぺんは描いた絵から: 頭の真ん中から頭の上の向きへ、絵が続く所まで歩く (帽子・髪・ヘルメットの上まで)。頭の幅の 3 本の線で一番遠い所 — 手や持ち物が頭の上にあっても、間が空いていればそこで止まる) */
+      const w = cv.width, h = cv.height, A9 = cv.getContext('2d').getImageData(0, 0, w, h).data, op = (x, y) => { const xi = Math.round(x), yi = Math.round(y); return xi >= 0 && yi >= 0 && xi < w && yi < h && A9[(yi * w + xi) * 4 + 3] > 100; };
+      const c0 = cam.project(mirrorPoint(J.head, hand)), c1 = cam.project(mirrorPoint(V.add(J.head, V.mul(up, 0.1 * k)), hand)), dl = Math.hypot(c1.x - c0.x, c1.y - c0.y) || 1, ux = (c1.x - c0.x) / dl, uy = (c1.y - c0.y) / dl, rP = CONFIG.body.radius.head * k * (c0.s || 1);
+      let best = -Infinity; for (const o9 of [-0.35, 0, 0.35]) { const bx = c0.x - uy * o9 * rP, by = c0.y + ux * o9 * rP; let sv = null, gap = 0; for (let st = -rP; st <= rP * 3.2; st += 0.5) { if (op(bx + ux * st, by + uy * st)) { sv = st; gap = 0; } else if (sv != null && ++gap > 3) break; } if (sv != null && sv > best) best = sv; } /* (頭の真ん中が絵の上で頭の外 (礼の下を向いた札) でも、頭の半径ぶん手前から歩き始める) */
+      if (best > -rP) { let x = c0.x + ux * (best + 0.5), y = c0.y + uy * (best + 0.5); const sc9 = Math.max(1, Math.min(SMKIT_C.pxMax, Math.round(px || 1))); x *= sc9; y *= sc9; if (rot > 0) { const x2 = cam.h * sc9 - y; y = x; x = x2; } else if (rot < 0) { const x2 = y; y = cam.w * sc9 - x; x = x2; } T = [x, y]; } } catch (e) { smkitErr('top', e); } }
+  const mR = hand === 'L' ? 'L' : 'R', mL = hand === 'L' ? 'R' : 'L', hr = one(mR), hl = one(mL);
+  return { head: [r1(T[0]), r1(T[1])], foot: [r1(Fo[0]), r1(Fo[1])], handR: hr && hr.at, handL: hl && hl.at, gripR: hr && hr.grip, gripL: hl && hl.grip, armR: hr && hr.arm, armL: hl && hl.arm }; }
 // カメラ: perspCam と同じ写し。upH があれば、画の上をその向き (fwd に直角な分) にする (カメラを転がす — 胴上げの頭の札を体に合わせるため)
 function smkitPCam(pos, fwd, f, w, h, cx, cy, upH) { if (!upH) return perspCam(pos, fwd, f, w, h, cx, cy); const fw = V.norm(fwd), u0 = V.norm(V.sub(upH, V.mul(fw, V.dot(upH, fw)))), right = V.norm(V.cross(fw, u0)), up = V.cross(right, fw);
   const cam = { kind: 'persp', pos, fwd: fw, right, up, f, w, h, cx, cy, roll: 1, project(p) { const d0 = p[0] - pos[0], d1 = p[1] - pos[1], d2 = p[2] - pos[2], z = Math.max(0.05, d0 * fw[0] + d1 * fw[1] + d2 * fw[2]); return { x: cam.cx + f * (d0 * right[0] + d1 * right[1] + d2 * right[2]) / z, y: cam.cy - f * (d0 * up[0] + d1 * up[1] + d2 * up[2]) / z, z, s: f / z }; } }; return cam; }
@@ -73536,9 +73723,10 @@ function smkitDir(d) { if (typeof d === 'number' && isFinite(d)) return d; if (d
      首脳陣は試合のベンチの首脳陣 (benchDress の zcast・benchManLook・上着 benchJacket)、オーナーは同じ体と顔の作りで背広 (smkitSuit)。2 人の形 (握手・肩を組む) は with に 2 人目。 */
 const SMKIT_EV = { names: { bow: 'bow', shake: 'shake', douage: 'douage', bouquet: 'bouquet', cry: 'cry', cover: 'cover', point: 'point', shoulder: 'shoulder', guts: 'guts', hat: 'hat',
     cage: 'cage', swing: 'swing', pen: 'pen', knock: 'knock', '礼': 'bow', '握手': 'shake', '胴上げ': 'douage', '花束': 'bouquet', '泣く': 'cry', '顔を覆う': 'cover', '指さし': 'point', '肩を組む': 'shoulder', 'ガッツポーズ': 'guts', '帽子': 'hat',
-    'ケージ': 'cage', '素振り': 'swing', 'ブルペン': 'pen', 'ノック': 'knock' },
-  bow: [50, 36] /* 礼: 胸・腰を前へ倒す角度 (度) — 腰から 40° ほど */, pair: { shake: 0.86, shoulder: 0.5 } /* 2 人の間 (体の真ん中どうし m・背丈 1.85 m の時) */, toss: { tilt: [-70, -88, -102], y: [1.85, 2.45], roll: 16, arch: 16, elevF: 28 } /* 胴上げ: 後ろへ倒す角度 (上がる途中・頂点・落ちる途中)・腰の高さ m (上がり始め / 頂点)・胸を前の側へ向ける角度・背中の反り */, practice: ['cage', 'swing', 'pen', 'knock'], nMax: 24,
-  flowers: ['#e8384f', '#ff8fb1', '#ffd23f', '#f4f2ec', '#c86bfa'], suit: ['#2b3140', '#3a3f4a', '#2f3a52', '#3b3430'], staffRole: { mgr: 'mgr', coach: 'bat', bat: 'bat', pit: 'pit', def: 'def', data: 'data', bpc: 'bpc', owner: 'owner', '監督': 'mgr', 'コーチ': 'bat', 'オーナー': 'owner' } };
+    'ケージ': 'cage', '素振り': 'swing', 'ブルペン': 'pen', 'ノック': 'knock', phone: 'phone', mic: 'mic', '電話': 'phone', 'マイク': 'mic' },
+  bow: [50, 36] /* 礼: 胸・腰を前へ倒す角度 (度) — 腰から 40° ほど */, pair: { shake: 0.86, shoulder: 0.5 } /* 2 人の間 (体の真ん中どうし m・背丈 1.85 m の時) */, toss: { tilt: [-70, -88, -102], y: [1.85, 2.45], roll: 16, arch: 16, elevF: 72 } /* 胴上げ: 後ろへ倒す角度 (上がる途中・頂点・落ちる途中)・腰の高さ m (上がり始め / 頂点)・胸を前の側へ向ける角度・背中の反り・前 (足の側) から見下ろす角度 (11/21 penaA45: 28 → 72 — 胸の側から) */, practice: ['cage', 'swing', 'pen', 'knock'], nMax: 24,
+  flowers: ['#e8384f', '#ff8fb1', '#ffd23f', '#f4f2ec', '#c86bfa'], suit: ['#2b3140', '#3a3f4a', '#2f3a52', '#3b3430'], staffRole: { mgr: 'mgr', coach: 'bat', bat: 'bat', pit: 'pit', def: 'def', data: 'data', bpc: 'bpc', owner: 'owner', press: 'press', '監督': 'mgr', 'コーチ': 'bat', 'オーナー': 'owner', '記者': 'press' },
+  pressSuit: ['#6b6f78', '#7a6650', '#4c5868', '#5d6a58', '#8a8478'] /* (11/21 kitPoints: 記者の上着 — 背広より明るい色・ネクタイなし) */ };
 function smkitEvName(p) { return SMKIT_EV.names[p] || null; }
 // 立つ形の土台: at に立って face を向く。o は bodyForm の項目を上書き (arms は J0 → { wL, wR, pL, pR })
 function smkitStd(D, at, face, o) { const k = D.k, lf = hLeft(face), feet = { L: { p: V.add(at, V.mul(lf, 0.13 * k)), toe: face }, R: { p: V.add(at, V.mul(lf, -0.13 * k)), toe: face } };
@@ -73564,7 +73752,7 @@ function smkitEvForm(name, D, at, face, P0, look, side, opt) { const k = D.k, lf
       /* (立った形で作ってから仰向けに倒す。立った形の「前」が倒した後の空・「後ろ」が下 (担ぐ手の上)。
           上がる途中 (ph 0): 体はまだ起き気味・腕は空へ伸ばす・足は下へ垂れる / 頂点 (0.5): 体は水平で反る・腕はばんざいで開く・膝から下がだらんと垂れる / 落ちる途中 (1): 頭が少し下がる・腕は上で揺れる・足は上へ開く) */
       const fy = (dz, dy, w9) => ({ p: V.add(V.add(V.add(at, V.mul(face, dz * k)), V.mul(lf, w9 * k)), [0, dy * k, 0]), toe: face, pole: V.norm(V.add(face, [0, -0.3, 0])) });
-      const legs = fall > 0 ? { L: fy(0.3 + 0.12 * fall, 0.32 + 0.2 * fall, 0.27), R: fy(0.24 + 0.1 * fall, 0.26 + 0.2 * fall, -0.3) } : { L: fy(-0.22 - 0.02 * rise, 0.34 - 0.2 * rise, 0.2), R: fy(-0.18 - 0.04 * rise, 0.26 - 0.16 * rise, -0.17) };
+      const legs = fall > 0 ? { L: fy(-0.22 + 0.77 * fall, 0.34 - 0.04 * fall, 0.2 + 0.06 * fall), R: fy(-0.18 + 0.66 * fall, 0.26 + 0.1 * fall, -0.17 - 0.1 * fall) } /* (11/21 penaA45: 落ちる途中は、垂れた膝から下を、膝をほとんど伸ばした V の字 (腰が一番下・足は足の側の空へ斜め) へ — 前は膝を胸へ抱えて、太ももが胸と顔の前をふさいだ) */ : { L: fy(-0.22 - 0.02 * rise, 0.34 - 0.2 * rise, 0.2), R: fy(-0.18 - 0.04 * rise, 0.26 - 0.16 * rise, -0.17) };
       const aL = rise > 0 ? V.add(V.add(V.mul(up, 0.55), V.mul(face, 0.6)), V.mul(lf, 0.35)) : fall > 0 ? V.add(V.add(V.mul(up, 0.85), V.mul(lf, 0.5)), V.mul(face, 0.2)) : V.add(V.add(V.mul(up, 0.75), V.mul(lf, 0.6)), V.mul(face, 0.2));
       const aR = rise > 0 ? V.add(V.add(V.mul(up, 0.5), V.mul(face, 0.65)), V.mul(rt, 0.35)) : fall > 0 ? V.add(V.add(V.mul(up, 0.45), V.mul(face, 0.6)), V.mul(rt, 0.55)) : V.add(V.add(V.mul(up, 0.75), V.mul(rt, 0.6)), V.mul(face, 0.2));
       const q0 = smkitStd(D, at, face, { lean: -T.arch, feet: legs, look: V.add(V.add(at, V.mul(face, 4)), [0, 1.0 + 2.6 * k, 0]), noClear: true, arms: J0 => ({ wL: smkitReach(D, J0, 'L', aL, 0.93), wR: smkitReach(D, J0, 'R', aR, 0.93), pL: V.norm(V.add(V.mul(face, -0.6), dn)), pR: V.norm(V.add(V.mul(face, -0.6), dn)) }) });
@@ -73584,6 +73772,10 @@ function smkitEvForm(name, D, at, face, P0, look, side, opt) { const k = D.k, lf
     case 'shoulder': { const B = P0 && P0.base, inner = side > 0 ? 'R' : 'L', outer = inner === 'R' ? 'L' : 'R', w9 = B ? V.add(V.add(V.add(B.J[inner === 'R' ? 'shoulderR' : 'shoulderL'], V.mul(face, -0.05 * k)), V.mul(inner === 'R' ? lf : rt, 0.07 * k)), [0, 0.04 * k, 0]) : null; /* (手は相手の向こうの肩の上 — 肩の外へはみ出さない) */
       return { q: smkitStd(D, at, face, { lean: 2, arms: J0 => { const o = {}; o['w' + inner] = w9 || smkitReach(D, J0, inner, V.add(V.mul(inner === 'R' ? rt : lf, 0.8), up), 0.9); o['p' + inner] = V.norm(V.add(V.mul(face, -0.8), [0, 0.6, 0])); o['w' + outer] = elbowHang(D, J0, outer, face); return o; } }) }; } /* (内の腕を相手の向こうの肩へ — 首の後ろを通す) */
     case 'guts': return { q: smkitStd(D, at, face, { lean: -4, look: V.add(V.add(at, V.mul(face, 6)), [0, 2.4, 0]), arms: J0 => ({ wR: V.add(J0.shoulderR, V.add(V.add(V.mul(up, 0.3 * k), V.mul(rt, 0.25 * k)), V.mul(face, 0.04 * k))), pR: V.norm(V.add(V.mul(rt, 0.95), [0, -0.15, 0])), /* (拳を握って突き上げる: 上腕は横・前腕は立てる — 肘は外) */ wL: V.add(J0.hipL, V.add(V.add(V.mul(face, 0.16 * k), [0, 0.1 * k, 0]), V.mul(lf, 0.02 * k))), pL: V.norm(V.add(V.mul(face, -0.9), [0, -0.3, 0])) }) }) };
+    case 'phone': { const q = smkitStd(D, at, face, { lean: 3, look: V.add(V.add(at, V.mul(face, 6)), [0, 1.1, 0]), arms: J0 => ({ wL: elbowHang(D, J0, 'L', face), wR: V.add(J0.head, V.add(V.add(V.mul(rt, 0.115 * k), V.mul(face, 0.05 * k)), [0, -0.11 * k, 0])), pR: V.norm(V.add(V.add(V.mul(dn, 0.8), V.mul(rt, 0.45)), V.mul(face, 0.4))) }) });
+      return { q, grip: { R: V.norm(V.add(V.mul(face, 0.7), V.mul(dn, 0.7))) } }; } /* (11/21 kitPoints: 片手で電話を耳に当てる — 握り拳を右の耳の横に (肘は下・外・少し前)。握った物の向き = 耳から口の方 (前と下)。電話は 100ペナが handR と gripR に描く) */
+    case 'mic': { const q = smkitStd(D, at, face, { lean: 4, look: V.add(V.add(at, V.mul(face, 6)), [0, 1.5, 0]), arms: J0 => ({ wL: elbowHang(D, J0, 'L', face), wR: V.add(J0.shoulderR, V.add(V.add(V.mul(face, 0.42 * k), V.mul(lf, 0.07 * k)), [0, -0.13 * k, 0])), pR: V.norm(V.add(dn, V.mul(rt, 0.6))) }) });
+      return { q, grip: { R: V.norm(V.add(V.mul(face, 0.55), V.mul(up, 0.85))) } }; } /* (11/21 kitPoints: 片手でマイクを前へ差し出す — 胸の高さの前・少し内へ。握った物の向き = 上と前 (相手の口の方)) */
     case 'hat': { const q = smkitStd(D, at, face, { lean: 3, look: V.add(V.add(at, V.mul(face, 6)), [0, 1.9, 0]), arms: J0 => ({ wL: elbowHang(D, J0, 'L', face), wR: smkitReach(D, J0, 'R', V.add(V.add(V.mul(up, 0.85), V.mul(rt, 0.4)), V.mul(face, 0.25)), 0.9), pR: V.norm(V.add(V.mul(rt, 0.8), [0, -0.4, 0])) }) });
       const hd = q.J.handR, hc = u.helmet || '#1d2b47', bc = u.brim || u.trim || tone(hc, 0.8), c0 = V.add(hd, V.mul(up, 0.03 * k));
       const pc = u.crown || null, P = [{ a: c0, b: V.add(c0, V.mul(up, 0.085 * k)), r: 0.088 * k, r2: 0.055 * k, c: hc, hi: tone(hc, 1.4), ink: tone(hc, 0.45), front: 0.03 }];
@@ -73604,26 +73796,27 @@ if (typeof fkkFaceEx === 'function') { const f0 = fkkFaceEx; fkkFaceEx = functio
 // ---- 体と見た目の元: 選手 (野手・投手) か首脳陣・オーナー → { D, look, buildP, cap, hatOff, numbers, who, W } ----
 function smkitBody(o) { const G = PLAY.game, L = PENAX.live;
   if (o.staff) { const t = o.team === 'opp' ? 'opp' : 'my', role = SMKIT_EV.staffRole[o.staff]; if (!role) throw new Error('首脳陣の役が分からない: ' + o.staff); const T = L && L.I[t], Z = G.zcast && G.zcast[t]; if (!Z) throw new Error('首脳陣の名簿が無い');
-    let man = null; if (role === 'owner') man = smkitOwner(t, T, Z); else man = Z.staff.find(m => m && m.role === role) || (o.staff === 'coach' ? Z.staff.find(m => m && m.role !== 'mgr') : null) || (role === 'mgr' ? null : Z.staff[1]) || Z.staff[0]; if (!man) throw new Error('その役の人がいない: ' + o.staff);
-    const Pb = Object.assign({}, state.params, G.kit[t], { face100: null, hand: 'R' }), bl = penaLook(lookFor(Pb, state.uniform), Pb); BENCH.made = 0; let look = benchManLook(role === 'owner' ? Object.assign({}, man, { jacket: false }) : man, true, bl, null, Pb); if (!look) throw new Error('見た目を作れない');
-    if (role === 'owner') look = smkitSuit(look, man); return { D: benchDims(man.height || 1.75), look, buildP: benchBuildP(man, Pb), cap: look.u && look.u.helmet, hatOff: role === 'owner', numbers: role !== 'owner', who: { team: t, name: man.name, staff: role, title: man.title || '', no: look.num, age: man.age } }; }
+    let man = null; if (role === 'owner' || role === 'press') man = smkitOwner(t, T, Z, role); else man = Z.staff.find(m => m && m.role === role) || (o.staff === 'coach' ? Z.staff.find(m => m && m.role !== 'mgr') : null) || (role === 'mgr' ? null : Z.staff[1]) || Z.staff[0]; if (!man) throw new Error('その役の人がいない: ' + o.staff);
+    const Pb = Object.assign({}, state.params, G.kit[t], { face100: null, hand: 'R' }), bl = penaLook(lookFor(Pb, state.uniform), Pb); BENCH.made = 0; let look = benchManLook(role === 'owner' || role === 'press' ? Object.assign({}, man, { jacket: false }) : man, true, bl, null, Pb); if (!look) throw new Error('見た目を作れない');
+    if (role === 'owner' || role === 'press') look = smkitSuit(look, man, role === 'press' ? SMKIT_EV.pressSuit : null); const out9 = role === 'owner' || role === 'press'; return { D: benchDims(man.height || 1.75), look, buildP: benchBuildP(man, Pb), cap: look.u && look.u.helmet, hatOff: out9, numbers: !out9, who: { team: t, name: man.name, staff: role, title: man.title || '', no: look.num, age: man.age } }; }
   const W = smkitWho(o); if (!W) throw new Error('名簿にいない: ' + (o.pid != null ? 'pid ' + o.pid : o.name)); const who = { team: W.t, name: W.r.name, pid: W.r.pid, no: W.r.no, pit: W.pit || '' };
   if (W.pit) { const sw = smkitPitSwing(W), f = smkitPitFig(sw, smkitPitT(sw, 'set')); who.hand = sw.params.pitcherHand; who.no = f.look.num; return { D: f.D, look: f.look, buildP: f.buildP, cap: f.look.u && f.look.u.helmet, numbers: true, who, W }; }
   const p = smkitBatLook(W), look = penaLook(lookFor(p, state.uniform), p), buildP = {}; for (const k in p) if (/^build/.test(k)) buildP[k] = p[k]; who.hand = p.hand; who.no = look.num;
   return { D: benchDims(p.height), look, buildP, cap: look.u && look.u.helmet, numbers: true, who, W, p }; }
 // オーナー: 試合の首脳陣と同じ作り (benchMakeMan — 球団の名前の種) で 1 人。100ペナが init.<球団>.owner { name, age, female, f4, id } を送れば、名前・年・顔の種を合わせる (今は送っていない)
-function smkitOwner(t, T, Z) { const key = Z.tseed + '|owner'; let m = SMKIT.built.get(key); if (m) return m; const used = new Set(), nos = new Set(); for (const x of Z.staff) if (x) { used.add(x.name); nos.add(x.no); }
-  m = benchMakeMan(Z.tseed, 'staff', 8, 'owner', used, nos, t); m.title = 'オーナー'; const src = PENAX.live && PENAX.live.I && PENAX.live.I.msg && PENAX.live.I.msg[t] ? PENAX.live.I.msg[t].owner : null;
-  if (src && typeof src === 'object') { if (src.name) m.name = penaTxt(src.name); if (src.age != null) m.age = +src.age | 0; m.female = !!src.female; try { m.f100 = face100Norm({ name: m.name, bn: m.name + '#ow' + (src.id != null ? src.id : ''), pid: '', age: m.age, female: m.female, f4: typeof src.f4 === 'string' ? src.f4 : '' }, T.name); } catch (e) { /* 種の顔のまま */ } }
+// (11/21 kitPoints) 記者 (staff: 'press') も同じ作り (種の番号 9・肩書き「記者」・init.<球団>.press { name, age, female, f4, id } を送れば合わせる)
+function smkitOwner(t, T, Z, role9) { const role = role9 || 'owner', key = Z.tseed + '|' + role; let m = SMKIT.built.get(key); if (m) return m; const used = new Set(), nos = new Set(); for (const x of Z.staff) if (x) { used.add(x.name); nos.add(x.no); }
+  m = benchMakeMan(Z.tseed, 'staff', role === 'owner' ? 8 : 9, role, used, nos, t); m.title = role === 'owner' ? 'オーナー' : '記者'; const src = PENAX.live && PENAX.live.I && PENAX.live.I.msg && PENAX.live.I.msg[t] ? PENAX.live.I.msg[t][role] : null;
+  if (src && typeof src === 'object') { if (src.name) m.name = penaTxt(src.name); if (src.age != null) m.age = +src.age | 0; m.female = !!src.female; try { m.f100 = face100Norm({ name: m.name, bn: m.name + (role === 'owner' ? '#ow' : '#pr') + (src.id != null ? src.id : ''), pid: '', age: m.age, female: m.female, f4: typeof src.f4 === 'string' ? src.f4 : '' }, T.name); } catch (e) { /* 種の顔のまま */ } }
   SMKIT.built.set(key, m); return m; }
 // 背広: 上着とズボンを同じ濃い色・白いシャツの襟・ネクタイ (小物)・背番号なし・帽子なし
-function smkitSuit(L, man) { const C = SMKIT_EV.suit, sc = C[h32s('suit|' + (man && man.key || '')) % C.length], s2 = mixHex(sc, '#000000', 0.25), s3 = mixHex(sc, '#ffffff', 0.15), u = L.u || {};
+function smkitSuit(L, man, pal) { const C = pal || SMKIT_EV.suit, sc = C[h32s('suit|' + (man && man.key || '')) % C.length], s2 = mixHex(sc, '#000000', 0.25), s3 = mixHex(sc, '#ffffff', 0.15), u = L.u || {};
   const u2 = Object.assign({}, u, { id: (u.id || 'u') + '|suit', jersey: sc, under: sc, trim: s2, pants: sc, stripe: sc, sock: '#16171b', belt: '#111214', slv: null, slv2: null, pin: null, pinS: null, rag: null, yoke: null, band: null, sash: null, pk: 0, btn: s2, mark: sc, num: sc, numLine: sc });
-  u2.noSpon = true; /* (袖に広告のワッペンを付けない) */ const o = Object.assign({}, L, { u: u2, jacket: 1, suit: 1, num: '', sename: '', bare: false, wu: null, wuW: null }); /* (長袖 — 上着の袖を手首まで: bare なし・着こなし (wu) を外して下着の袖 = 上着の色 U.under) */ if (L.kit) { const K = L.kit, v = K.t && K.t[6] && K.t[6].H ? K.t[6].H : null; o.kit = Object.assign({}, K, { u: u2, key: K.key + '|suit', t: v ? K.t.slice(0, 6).concat([Object.assign({}, K.t[6], { H: Object.assign({}, v, { j: sc, jd: s2, jh: s3, under: sc, slv: sc, slv2: sc, pin: sc, rag: sc, yoke: sc, band: sc, sash: sc, pants: sc, pst: sc, pst2: sc, socks: '#16171b', sst: '#16171b', mark: sc, num: sc }) })]) : K.t }); } return o; }
+  u2.noSpon = true; /* (袖に広告のワッペンを付けない) */ const o = Object.assign({}, L, { u: u2, jacket: 1, suit: pal ? 2 : 1, num: '', sename: '', bare: false, wu: null, wuW: null }); /* (長袖 — 上着の袖を手首まで: bare なし・着こなし (wu) を外して下着の袖 = 上着の色 U.under) */ if (L.kit) { const K = L.kit, v = K.t && K.t[6] && K.t[6].H ? K.t[6].H : null; o.kit = Object.assign({}, K, { u: u2, key: K.key + '|suit', t: v ? K.t.slice(0, 6).concat([Object.assign({}, K.t[6], { H: Object.assign({}, v, { j: sc, jd: s2, jh: s3, under: sc, slv: sc, slv2: sc, pin: sc, rag: sc, yoke: sc, band: sc, sash: sc, pants: sc, pst: sc, pst2: sc, socks: '#16171b', sst: '#16171b', mark: sc, num: sc }) })]) : K.t }); } return o; }
 function smkitSuitProps(q, D) { const J = q.J, k = D.k; if (!J.neck || !J.chest) return []; const fw = V.norm(V.cross(V.sub(J.shoulderL, J.shoulderR), V.sub(J.neck, J.chest))), top = V.add(V.lerp(J.neck, J.chest, 0.15), V.mul(fw, 0.09 * k)), bot = V.add(V.lerp(J.neck, J.chest, 1.05), V.mul(fw, 0.1 * k));
-  return [{ a: top, b: V.lerp(top, bot, 0.55), r: 0.032 * k, r2: 0.012 * k, c: '#f2f2ee', ink: '#a8a8a0', front: 0.02 }, { a: V.add(top, V.mul(fw, 0.005)), b: V.add(bot, V.mul(fw, 0.005)), r: 0.012 * k, r2: 0.017 * k, c: '#8c1f2a', ink: '#4a0f15', front: 0.03 }]; } /* (白いシャツの胸元とネクタイ) */
+  const sh = { a: top, b: V.lerp(top, bot, 0.55), r: 0.032 * k, r2: 0.012 * k, c: '#f2f2ee', ink: '#a8a8a0', front: 0.02 }; return J.__noTie ? [sh] : [sh, { a: V.add(top, V.mul(fw, 0.005)), b: V.add(bot, V.mul(fw, 0.005)), r: 0.012 * k, r2: 0.017 * k, c: '#8c1f2a', ink: '#4a0f15', front: 0.03 }]; } /* (白いシャツの胸元とネクタイ) */
 // 1 人の図 (inject で描く): 形 q・体 B・足す役・小物
-function smkitFig(B, q, role9, props) { const role = Object.assign({ kind: 'runner', throwing: true, head: 'cap', capC: B.cap, bat: false, hands: { L: 'bare', R: 'bare' }, numbers: B.numbers !== false }, B.hatOff ? { hatOff: true } : {}, role9 || {}); const P = (props || []).concat(B.look && B.look.suit ? smkitSuitProps(q, B.D) : []); if (P.length) role.props = P;
+function smkitFig(B, q, role9, props) { const role = Object.assign({ kind: 'runner', throwing: true, head: 'cap', capC: B.cap, bat: false, hands: { L: 'bare', R: 'bare' }, numbers: B.numbers !== false }, B.hatOff ? { hatOff: true } : {}, role9 || {}); const P = (props || []).concat(B.look && B.look.suit ? smkitSuitProps(B.look.suit === 2 ? Object.assign({}, q, { J: Object.assign({ __noTie: 1 }, q.J) }) : q, B.D) : []); /* (記者の上着 suit 2 はネクタイなし) */ if (P.length) role.props = P;
   return { tag: 'ZK', D: B.D, hand: 'R', pose: q, look: B.look, swing: state.swing, buildP: B.buildP, role, groundY: 0 }; }
 // 練習の動き: 1 コマの時刻 u (0〜1) → { sw, pose, opts, fig?, pts, front } (カメラはコマの列で 1 つ)
 async function smkitPractice(name, B, us) { const out = [];
@@ -73647,33 +73840,42 @@ function smkitKnockSwing(B) { const G = PLAY.game, t = B.W.t, o = t === 'my' ? '
 function smkitPlayer(o) { return smkitSerial(async () => { const t0 = performance.now(); if (!SMKIT.ready) throw new Error('まだ読み込み中');
   smkitTeam(o.init || null); let pose = smkitPoseName(o.pose) || smkitEvName(o.pose), why = ''; if (!pose) throw new Error('ポーズが分からない: ' + o.pose);
   const h = Math.round(clamp(+o.h || SMKIT_C.hDef, SMKIT_C.hMin, SMKIT_C.hMax)), yaw = smkitDir(o.dir), elev = o.elev != null && isFinite(+o.elev) ? +o.elev : SMKIT_C.elev, wIn = o.w ? Math.round(clamp(+o.w, 8, SMKIT_C.hMax * 2)) : 0;
+  const ppm = o.ppm != null && isFinite(+o.ppm) && +o.ppm > 0 ? clamp(+o.ppm, SMKIT_C.ppmMin, SMKIT_C.ppmTop) : 0, KC = (pts, front, chest, yw, el, hh, ww, upH) => ppm ? smkitCamPpm(pts, front, chest, yw, el, ppm, o.h ? h : 0, upH ? 0 : (o.w ? wIn : 0), upH) : smkitCam(pts, front, chest, yw, el, hh, ww, upH); /* (11/21 kitPoints: ppm が来たら決まった縮尺で — 来ない時は今まで通り体を縦の 9 割に) */
+  let bp = null, bp2 = null, clip = false;
   const B = smkitBody(o), W = B.W, who = B.who; let R = null, frames = null; SMKIT.lastFigs = [];
   if (o.staff && (pose === 'stance' || pose === 'kick' || SMKIT_EV.practice.includes(pose))) { why = '首脳陣は ' + pose + ' なし — 立ちで描いた'; pose = 'stand'; }
   if (pose === 'kick' && !W.pit) { pose = 'stand'; why = '野手は足上げなし — 立ちで描いた'; }
   if (pose === 'stance' && W.k < 0 && !W.bench) pose = 'set'; /* (打順にも控えにもいない投手の構え = セット) */
-  if (pose === 'stance') { const sw = await smkitBatSwing(W), ps = sw.sample(0), pose0 = Object.assign({}, ps, { t: 0 }), J = ps.J, cam = smkitCam(smkitPts(J, sw.params.hand, [ps.bat.tip, ps.bat.knob]), [1, 0, 0], smkitChest(J, sw.params.hand), yaw, elev, h, wIn); R = smkitDraw(sw, pose0, cam); who.hand = sw.params.hand; who.no = penaLook(lookFor(sw.params, state.uniform), sw.params).num; SMKIT.lastFigs.push({ J, D: sw.dims, hand: sw.params.hand }); }
+  if (pose === 'stance') { const sw = await smkitBatSwing(W), ps = sw.sample(0), pose0 = Object.assign({}, ps, { t: 0 }), J = ps.J, cam = KC(smkitPts(J, sw.params.hand, [ps.bat.tip, ps.bat.knob]), [1, 0, 0], smkitChest(J, sw.params.hand), yaw, elev, h, wIn); R = smkitDraw(sw, pose0, cam); bp = [J, sw.dims, sw.params.hand, cam, 0, null, R.cv]; who.hand = sw.params.hand; who.no = penaLook(lookFor(sw.params, state.uniform), sw.params).num; SMKIT.lastFigs.push({ J, D: sw.dims, hand: sw.params.hand }); }
   else if (pose === 'kick' || pose === 'set') { const sw = smkitPitSwing(W), t = smkitPitT(sw, pose), f = smkitPitFig(sw, t), J = f.pose.J, F = fieldPlan(sw), toHome = mirrorPoint(V.sub([F.plateX, 0, F.plateZ], J.pelvis), f.hand); /* (前 = 本塁の方。左打者の画は鏡なので向きも鏡に) */
-    const cam = smkitCam(smkitPts(J, f.hand), toHome, smkitChest(J, f.hand), yaw, elev, h, wIn), ps = sw.sample(Math.max(0, t)); R = smkitDraw(sw, Object.assign({}, ps, { t }), cam, { crew: true, onlyTag: 'P' }); who.hand = sw.params.pitcherHand; who.no = f.look.num; SMKIT.lastFigs.push({ J, D: f.D, hand: f.hand }); }
+    const cam = KC(smkitPts(J, f.hand), toHome, smkitChest(J, f.hand), yaw, elev, h, wIn), ps = sw.sample(Math.max(0, t)); R = smkitDraw(sw, Object.assign({}, ps, { t }), cam, { crew: true, onlyTag: 'P' }); bp = [J, f.D, f.hand, cam, 0, null, R.cv]; who.hand = sw.params.pitcherHand; who.no = f.look.num; SMKIT.lastFigs.push({ J, D: f.D, hand: f.hand }); }
   else if (SMKIT_EV.practice.includes(pose)) { const n = Math.round(clamp(+o.n || 1, 1, SMKIT_EV.nMax)), us = n > 1 ? Array.from({ length: n }, (_, i) => i / n) : [clamp(o.t != null ? +o.t : 0.5, 0, 1)], L = await smkitPractice(pose, B, us);
     const trk = pose === 'knock', off = x => { if (!trk) return [0, 0, 0]; const p = mirrorPoint(x.J.pelvis, x.hand); return [p[0], 0, p[2]]; }; /* (ノック: 捕る人は横へ大きく動くので、カメラは腰の横の動きを追う — 大きさは全部のコマで同じ) */
-    const pts = []; for (const x of L) { const o9 = off(x); for (const p of smkitPts(x.J, x.hand, x.extra)) pts.push(V.sub(p, o9)); } const cam0 = smkitCam(pts, L[0].front, smkitChest(L[0].J, L[0].hand), yaw, elev, h, wIn); frames = [];
-    for (const x of L) { let r9; const o9 = off(x), cam = trk ? perspCam(V.add(cam0.pos, o9), cam0.fwd, cam0.f, cam0.w, cam0.h, cam0.cx, cam0.cy) : cam0; if (x.fig) { SMKIT.inject = [x.fig]; try { r9 = smkitDraw(state.swing, Object.assign({}, state.swing.sample(0), { t: 0 }), cam, { crew: true, onlyTag: 'ZK' }); } finally { SMKIT.inject = null; } } else r9 = smkitDraw(x.sw, x.pose, cam, x.opts); frames.push(await smkitOut(r9, o.px, o.fmt)); SMKIT.lastFigs.push({ J: x.J, D: B.D, hand: x.hand }); } }
-  else { const face = [1, 0, 0], figs = []; let pts = [], camF = face, camC = null, toss = null, faceEx = null, headDn = 0, view9 = null, rot9 = 0;
+    const pts = []; for (const x of L) { const o9 = off(x); for (const p of smkitPts(x.J, x.hand, x.extra)) pts.push(V.sub(p, o9)); } const cam0 = KC(pts, L[0].front, smkitChest(L[0].J, L[0].hand), yaw, elev, h, wIn); frames = [];
+    for (const x of L) { let r9; const o9 = off(x), cam = trk ? perspCam(V.add(cam0.pos, o9), cam0.fwd, cam0.f, cam0.w, cam0.h, cam0.cx, cam0.cy) : cam0; if (x.fig) { SMKIT.inject = [x.fig]; try { r9 = smkitDraw(state.swing, Object.assign({}, state.swing.sample(0), { t: 0 }), cam, { crew: true, onlyTag: 'ZK' }); } finally { SMKIT.inject = null; } } else r9 = smkitDraw(x.sw, x.pose, cam, x.opts); frames.push(Object.assign(await smkitOut(r9, o.px, o.fmt), { pts: smkitBodyPts(x.J, B.D, x.hand, cam, o.px, 0, null, r9.cv) })); if (cam.clip) clip = true; SMKIT.lastFigs.push({ J: x.J, D: B.D, hand: x.hand }); } }
+  else { const face = [1, 0, 0], figs = []; let pts = [], camF = face, camC = null, toss = null, faceEx = null, headDn = 0, view9 = null, rot9 = 0, grip9 = null;
     if (pose === 'stand' || pose === 'sit') { const q = pose === 'sit' ? benchSitForm(B.D, [0, BENCH.seatY, 0], face, 'rest', 0, [8, 1.2, 0]) : benchStandForm(B.D, [0, 0, 0], face, 'hang', 0, [6, 1.4, 0]); figs.push(smkitFig(B, q)); }
     else { const B2 = o.with && (pose === 'shake' || pose === 'shoulder') ? smkitBody(Object.assign({ init: null, team: o.team }, o.with)) : null, gap = (SMKIT_EV.pair[pose] || 0.8) * (B.D.k + (B2 ? B2.D.k : B.D.k)) / 2;
       if (B2 && pose === 'shake') { const a1 = [0, 0, 0], a2 = [gap, 0, 0], f1 = face, f2 = [-1, 0, 0], X1 = smkitEvForm('shake', B.D, a1, f1, { at: a2 }, B.look), X2 = smkitEvForm('shake', B2.D, a2, f2, { at: a1 }, B2.look); figs.push(smkitFig(B, X1.q), smkitFig(B2, X2.q)); who.with = B2.who; }
       else if (B2 && pose === 'shoulder') { const a1 = [0, 0, 0], a2 = [0, 0, gap], base1 = smkitStd(B.D, a1, face), base2 = smkitStd(B2.D, a2, face), X1 = smkitEvForm('shoulder', B.D, a1, face, { base: base2 }, B.look, 1), X2 = smkitEvForm('shoulder', B2.D, a2, face, { base: base1 }, B2.look, -1); figs.push(smkitFig(B, X1.q), smkitFig(B2, X2.q)); who.with = B2.who; } /* (自分の右 (+Z) に相手: 自分は右腕・相手は左腕を回す) */
-      else { const X = smkitEvForm(pose, B.D, [0, 0, 0], face, null, B.look, 1, { t: o.t, cap: o.cap }); if (!X) throw new Error('ポーズを作れない: ' + pose); if (X.face) faceEx = X.face; if (X.headDown) headDn = X.headDown; if (o.with) why = '2 人の形は shake / shoulder だけ — 1 人で描いた'; if (X.front) camF = X.front; if (X.chest) camC = X.chest; if (X.toss) toss = X; figs.push(smkitFig(B, X.q, X.role, X.props)); } }
+      else { const X = smkitEvForm(pose, B.D, [0, 0, 0], face, null, B.look, 1, { t: o.t, cap: o.cap }); if (!X) throw new Error('ポーズを作れない: ' + pose); if (X.face) faceEx = X.face; if (X.headDown) headDn = X.headDown; if (o.with) why = '2 人の形は shake / shoulder だけ — 1 人で描いた'; if (X.front) camF = X.front; if (X.chest) camC = X.chest; if (X.toss) toss = X; if (X.grip) grip9 = X.grip; figs.push(smkitFig(B, X.q, X.role, X.props)); } }
     for (const f of figs) { pts = pts.concat(smkitPts(f.pose.J, 'R', (f.role.props || []).map(p => p.b))); SMKIT.lastFigs.push({ J: f.pose.J, D: f.D, hand: 'R', props: f.role.props || null }); }
-    let cam = smkitCam(pts, camF, figs.length > 1 && pose === 'shake' ? [0, 0, 1] : camC, yaw, elev, h, wIn);
+    let cam = KC(pts, camF, figs.length > 1 && pose === 'shake' ? [0, 0, 1] : camC, yaw, elev, h, wIn);
     if (toss) { /* (11/20 松田さん「後頭部が下、顔が上を向いてないとおかしい」: 試合の頭は立った人の札 (画の上 = 頭の上) なので、仰向けの人を横から写すと顔だけが立ってこちらを向いた。
         足の側 (前) から: 頭の上はカメラの奥 — 札は立てたままで正面の札・あごを上げた段 (あごと首の下が見え、顔は上)。
         斜め・横: 画の上を体の頭の向きに合わせてカメラを転がして描き (札が体と同じ向きに貼られる — 横顔の札で顔が空・後頭部が下)、出来た絵を 90° 回して戻す) */
-      const hy = axisOf(figs[0].pose.Rh, 1), ang = Math.acos(clamp(Math.abs(V.dot(V.norm([hy[0], 0, hy[2]]), V.norm([cam.fwd[0], 0, cam.fwd[2]]))), 0, 1)) * R2D;
-      if (ang < 30) { headDn = -2; view9 = { key: 'FR', mir: false }; if (o.elev == null) cam = smkitCam(pts, camF, camC, yaw, SMKIT_EV.toss.elevF, h, wIn); } /* (足の側から: 少し上から (elevF°) — 膝と足の向こうに胸と顔。顔は正面の札・あごを少し上げた段 1) */
-      else { const hF = Math.round(h * SMKIT_C.wMax); cam = smkitCam(pts, camF, camC, yaw, elev, hF, h, hy); const U = [0, 1, 0], vx = V.dot(U, cam.right); rot9 = vx < 0 ? 1 : -1; headDn = 0; view9 = smkitHeadView(cam, figs[0].pose.Rh); } }
-    SMKIT.inject = figs; SMKIT.faceEx = faceEx; SMKIT.headDown = headDn; SMKIT.view = view9; try { R = smkitDraw(state.swing, Object.assign({}, state.swing.sample(0), { t: 0 }), cam, { crew: true, onlyTag: 'ZK' }); if (rot9) R.rot = rot9; } finally { SMKIT.inject = null; SMKIT.faceEx = null; SMKIT.headDown = 0; SMKIT.view = null; } }
-  const r = frames ? { frames, url: frames[0].url, blob: frames[0].blob, w: frames[0].w, h: frames[0].h } : await smkitOut(R, o.px, o.fmt); SMKIT.n.player++; try { if (typeof trimCaches === 'function') trimCaches(); } catch (e) { /* 次 */ } /* (試合が新しい打者の度にする作り置きの間引き (顔・服・グラブの絵) — 何百人描いても溜まらない) */ SMKIT.last = { pose, yaw, h, ms: performance.now() - t0 };
+      const hy = axisOf(figs[0].pose.Rh, 1), hyF = V.dot(V.norm([hy[0], 0, hy[2]]), V.norm([cam.fwd[0], 0, cam.fwd[2]])), ang = Math.acos(clamp(Math.abs(hyF), 0, 1)) * R2D;
+      /* (11/21 penaA45 — 100ペナ A5「前から見ると胴と首が見えず、顔が太ももの付け根に乗る・t1 は太ももが画をふさぐ・t0 は立って跳ねて見える」:
+          前 (足の側) は、胸の側 (空の上・足の側へ toss.elevF° 倒した所) から見下ろす。斜め・横と同じく画の上を頭の向きにしてカメラを転がして描き、90° 回して頭を左へ
+          (体が横に寝て写る — 真上から縦のままだと立った人と同じに見える)。顔は胸と同じくカメラを向くので正面の札 (後頭部が下・顔が上 — 11/20 の決まりのまま)。後ろ (頭の側) は前のまま) */
+      if (ang < 30 && hyF > 0) { const hF = Math.round(h * SMKIT_C.wMax); cam = KC(pts, camF, camC, yaw, o.elev != null ? elev : SMKIT_EV.toss.elevF, hF, h, hy); rot9 = -1; headDn = -2; view9 = smkitHeadView(cam, figs[0].pose.Rh); }
+      else if (ang < 30) { headDn = -2; view9 = { key: 'FR', mir: false }; if (o.elev == null) cam = KC(pts, camF, camC, yaw, SMKIT_EV.toss.elevF, h, wIn); } /* (足の側から: 少し上から (elevF°) — 膝と足の向こうに胸と顔。顔は正面の札・あごを少し上げた段 1) */
+      else { const hF = Math.round(h * SMKIT_C.wMax); cam = KC(pts, camF, camC, yaw, elev, hF, h, hy); const U = [0, 1, 0], vx = V.dot(U, cam.right); rot9 = vx < 0 ? 1 : -1; headDn = 0; view9 = smkitHeadView(cam, figs[0].pose.Rh); } }
+    SMKIT.inject = figs; SMKIT.faceEx = faceEx; SMKIT.headDown = headDn; SMKIT.view = view9; try { R = smkitDraw(state.swing, Object.assign({}, state.swing.sample(0), { t: 0 }), cam, { crew: true, onlyTag: 'ZK' }); if (rot9) R.rot = rot9; bp = [figs[0].pose.J, figs[0].D, 'R', cam, rot9, grip9, R.cv]; if (figs[1]) bp2 = [figs[1].pose.J, figs[1].D, 'R', cam, rot9, null, R.cv]; } finally { SMKIT.inject = null; SMKIT.faceEx = null; SMKIT.headDown = 0; SMKIT.view = null; } }
+  const r = frames ? { frames, url: frames[0].url, blob: frames[0].blob, w: frames[0].w, h: frames[0].h, pts: frames[0].pts } : await smkitOut(R, o.px, o.fmt);
+  if (!frames && bp) { r.pts = smkitBodyPts(bp[0], bp[1], bp[2], bp[3], o.px, bp[4], bp[5], bp[6]); if (bp[3].clip) clip = true; } if (bp2) r.pts2 = smkitBodyPts(bp2[0], bp2[1], bp2[2], bp2[3], o.px, bp2[4], null, bp2[6]); /* (11/21 kitPoints: 体の点 — 頭のてっぺん・足もと・握る所と向き。2 人の形は pts2 が 2 人目) */
+  r.height = +(B.D.k * 1.85).toFixed(2); who.height = r.height; if (ppm) { r.ppm = ppm; if (clip) r.clip = true; } if (who.with && bp2) who.with.height = +(bp2[1].k * 1.85).toFixed(2); /* (背丈 m — 体の寸法 makeDims の k × 1.85) */ SMKIT.n.player++; try { if (typeof trimCaches === 'function') trimCaches(); } catch (e) { /* 次 */ } /* (試合が新しい打者の度にする作り置きの間引き (顔・服・グラブの絵) — 何百人描いても溜まらない) */ SMKIT.last = { pose, yaw, h, ms: performance.now() - t0 };
+  for (const w9 of [who, who.with]) if (w9 && w9.no != null && w9.no !== '' && isFinite(+w9.no)) w9.no = +w9.no; /* (11/21 penaA45: who.no はいつも数 (100ペナが送る no と同じ形) — 前は立ち・構えが字、イベントが数だった) */
   return Object.assign({ ok: true, pose, dir: yaw, ms: Math.round(performance.now() - t0), who, why }, r); }); }
 // ---- 球場の 1 枚: o = { stadIdx, time, fill, w, h, era, people, u, init, fmt } ----
 function smkitStadOrbit(sw, u) { const G9 = GAME_SHOW, at0 = G9.at, un0 = G9.until; let orb = null; try { const now = performance.now(), L = 10000; G9.at = now - u * L; G9.until = G9.at + L; orb = typeof sartIntroOrbit === 'function' ? sartIntroOrbit(sw) : null; } catch (e) { orb = null; } finally { G9.at = at0; G9.until = un0; }
@@ -73929,13 +74131,13 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined') setTimeout
 // なぜ / 何を: 範囲の決まりと捕手の構えの所は塊 AIMR_CORE (CORE の中) の注。ここは
 //   ① pmExpect を包む: PM.targetPt (押した所) を着く所として範囲の中へ寄せ、投げ出しの所 = 着く所 − 変化の見込み を返す (pmPlan はそれを投げる向きに使う — 的の中のぶれと球の道は前のまま)。
 //      押した所が無い時 (1 球ごとに真ん中へ戻した時 AIM_HOME) は、そのコースの点が着く所 (前は投げ出しの所だったので、変化球は的が真ん中から外れて出た)。
-//   ② 狙う間の画: 押せない所を薄い影で・範囲の縁を点線で。変化の大きい球は投げ出しの所 (小さい輪) から的まで、曲がる道の見込みを薄い点で。指を押している間は少し濃く。
+//   ② 狙う間の画: 押せない所を薄い影で・範囲の縁を点線で (11/21 から既定は描かない — 松田さん「あれいらないよ」。?aimrveil=1 で描く)。変化の大きい球は投げ出しの所 (小さい輪) から的まで、曲がる道の見込みを薄い点で。指を押している間は少し濃く。
 //   ③ おまかせ (pctlAutoAim): 前は「着かせたい所 − 変化の見込み」を PM_FREE (投げ出しの幅) で切って押していた → 着かせたい所を範囲で寄せてそのまま押す (変化の大きい球も狙い通りの所へ)。
 //   ④ CPU (pitchiCpuOpt): 的の真ん中 (opt.aimAt) を同じ範囲へ寄せる。捕手の構え (pk.targetPt) は前の ±1.9 の幅で切らず、狙いの所そのもの。イップスの球と報復の球 (pk.bean — 塊 TCRULE) はそのまま。
 //   ⑤ PM_FREE (押せる所の枠・キーボードとコントローラーの動く幅) を範囲の外枠に (前は投げ出しの所の幅 横 −3.6〜5.8・高さ −4.2〜5.6)。
 // 守る事: AIMR_C.on = 0 (?aimr=0) で前のまま。AIM_HIDE (投げ始めで的と枠を消す) と AIM_HOME (1 球ごとに真ん中へ) はそのまま。
 const AIMR = { n: { clamp: 0, auto: 0, cpu: 0, cpuClamp: 0, draw: 0 }, last: null, err: '', nErr: 0, wrap: {}, free0: null,
-  show: { shade: '6,10,20', a: 0.26, aDown: 0.36, edge: 'rgba(255,255,255,0.38)', path: '255,236,170', pathA: 0.8, minPx: 10, rel: 0.75, dot: 1.9 } };
+  show: { veil: (() => { try { return new URLSearchParams(window.__TRIAL_Q || location.search).get('aimrveil') === '1' ? 1 : 0; } catch (e) { return 0; } })(), /* (11/21 cardHide 松田さん「デッドボールを避ける、なんか黒いもやがかかって、投げれる所だけ透明になってるみたいなの、あれいらないよ。」: 押せない所の影と範囲の縁の点線を描かない — 範囲の決まり (寄せる・死球と暴投の所は狙えない) と曲がる道の見込みはそのまま。?aimrveil=1 で前の影と縁) */ shade: '6,10,20', a: 0.26, aDown: 0.36, edge: 'rgba(255,255,255,0.38)', path: '255,236,170', pathA: 0.8, minPx: 10, rel: 0.75, dot: 1.9 } };
 function aimrErr(e) { AIMR.nErr++; AIMR.err = String(e && e.stack || e).slice(0, 300); }
 function aimrOnPitch() { try { return !!AIMR_C.on && !((PM.level || 0) > 0); } catch (e) { return false; } }
 function aimrBrk(ty) { try { return breakUOf(pmBreakP(ty || PM.type, true)); } catch (e) { return [0, 0]; } }
@@ -73975,11 +74177,24 @@ function aimrCatSk() { try { if (!AIMR_C.on || !AIMR_MC.on || typeof pa2Catcher 
 if (typeof playParams === 'function' && !playParams._aimr) { const f0 = playParams; playParams = function () { const P = f0.apply(this, arguments); try { const k = aimrCatSk(); if (k != null && P) { P.catchSkill = k; AIMR_CAT.n++; } } catch (e) { aimrErr(e); } return P; }; playParams._aimr = 1; AIMR.wrap.catP = 1; }
 // ⑧ (11/21) おまかせの打者の振る割合をカウントで (塊 AIMR_CORE ⑥ と同じ表)。前は ゾーン 0.8・近いボール 0.3・遠いボール 0.04 でカウントに依らなかった
 if (typeof penabAuto === 'function' && !penabAuto._aimr) { const f0 = penabAuto; penabAuto = function (p0, Z, M9) { let p = p0; try { if (AIMR_C.on && AIMR_SWC.on && Z && typeof PENAX_C !== 'undefined') { const C = PENAX_C.auto.sw, inZ = !!Z.inZone; p = inZ ? p0 * aimrSwcK(PLAY.count, true) * AIMR_SWC.refZ / C.zone : p0 * aimrSwcK(PLAY.count, false); p = clamp(p, 0.005, 0.97); AIMR_SWC.n++; } } catch (e) { aimrErr(e); p = p0; } const o9 = f0.call(this, p, Z, M9); try { if (o9 && AIMR_C.on && AIMR_2S.on && PLAY.count && PLAY.count.s >= 2) o9.k = (o9.k || 1) * AIMR_2S.autoK; } catch (e) { aimrErr(e); } return o9; }; penabAuto._aimr = 1; /* (11/21: 2 ストライクは当てに行く振り — 時刻とカーソルのずれの幅 × AIMR_2S.autoK) */ AIMR.wrap.auto2 = 1; }
+// ⑨ (11/21) CPU の報復の球 (gameRetalPitch を包む): 調整役 11/21「報復は、ごくまれな出来事 (1 シーズンに数回くらい) にしてください。1 試合に 1 回まで。体に当てる狙いではなく、内角を厳しく突く狙い」。
+//   前は 当てられた後 1 球ごとに 30% (3 回目の後は 50%) で体の方 (−2.9〜−3.4 目盛り) へ投げ、よけられると 当てるまで続いた (16 試合で よけた球 2.31・暴投 0.75 / チーム・試合)。
+//   後: 当てられた (revenge / must) のを初めて見た時に 1 回だけ、p (3 回目の後は pMust) で「報復の打席」にするかを決める (1 シーズン 143 試合・死球 50 ほどで 数回)。
+//       報復の打席では 1 球ごと pPitch で 1 球だけ、直球で内角いっぱい (aim) を狙う — 着く所は的の中のぶれと抜け球 (塊 AIM・AIMR_SLIP) の物理のまま。投げたらその試合はもう投げない
+const AIMR_RETAL = { on: 1, p: 0.06, pMust: 0.3, pPitch: 0.35, aim: [-1.45, 0.3], n: { decide: 0, yes: 0, pitch: 0 } };
+if (typeof gameRetalPitch === 'function' && !gameRetalPitch._aimr) { const f0 = gameRetalPitch; gameRetalPitch = function (pk) { if (!AIMR_C.on || !AIMR_RETAL.on) return f0.apply(this, arguments); try {
+      if (!pk || typeof gameOn !== 'function' || !gameOn()) return pk; const G = PLAY.game, H = G.hbp, R = AIMR_RETAL; if (!H || gameBatTeam() !== 'my' || !(H.revenge.opp > 0 || H.must === 'opp')) return pk;
+      const S = G.aimrRetal || (G.aimrRetal = { decided: false, want: false, done: false }); if (S.done) return pk;
+      if (!S.decided) { S.decided = true; R.n.decide++; S.want = Math.random() < (H.must === 'opp' ? R.pMust : R.p); if (S.want) R.n.yes++; }
+      if (!S.want || Math.random() >= R.pPitch) return pk; S.done = true; R.n.pitch++;
+      const A = typeof pitchiAimFor === 'function' ? pitchiAimFor(pitchiFld(), null, false, Math.random) : null; if (!A) return pk;
+      const ct = pitchControl('mi', Math.random, 'fast', { aim: A, aimAt: R.aim.slice(), aimKey: 'mi' }); return Object.assign(pk, { course: ct.course, missSide: ct.missSide, missHeight: ct.missHeight, target: 'mi', pitchType: 'fast', targetPt: R.aim.slice(), retalAim: true, hbpRoll: Math.round(Math.random() * 1000) / 1000 });
+    } catch (e) { aimrErr(e); return pk; } }; gameRetalPitch._aimr = 1; AIMR.wrap.retal = 1; }
 // ② 狙う間の画 (的の下に描く)
 function aimrDraw(c, P, dpr) { try { const S = AIMR.show, ex = pmExpect(); if (!ex) return; const b = [ex.pt[0] - ex.aim[0], ex.pt[1] - ex.aim[1]], poly = aimrPoly(PM.type, b, 36), down = !!(PLAY.down && PLAY.down.aim);
     const path = (q, mv) => q.forEach((p, i) => { const r = P(p[0], p[1]); if (i || !mv) c.lineTo(r.x, r.y); else c.moveTo(r.x, r.y); });
-    c.save(); c.beginPath(); path([[-8, -9], [9, -9], [9, 10], [-8, 10]], true); c.closePath(); path(poly, true); c.closePath(); c.fillStyle = 'rgba(' + S.shade + ',' + (down ? S.aDown : S.a) + ')'; c.fill('evenodd');
-    c.beginPath(); path(poly, true); c.closePath(); c.setLineDash([3 * dpr, 4 * dpr]); c.strokeStyle = S.edge; c.lineWidth = 1 * dpr; c.stroke(); c.setLineDash([]);
+    c.save(); if (S.veil) { c.beginPath(); path([[-8, -9], [9, -9], [9, 10], [-8, 10]], true); c.closePath(); path(poly, true); c.closePath(); c.fillStyle = 'rgba(' + S.shade + ',' + (down ? S.aDown : S.a) + ')'; c.fill('evenodd');
+      c.beginPath(); path(poly, true); c.closePath(); c.setLineDash([3 * dpr, 4 * dpr]); c.strokeStyle = S.edge; c.lineWidth = 1 * dpr; c.stroke(); c.setLineDash([]); } /* (押せない所の影と縁: 既定は描かない — 上の show.veil) */
     const q0 = P(ex.aim[0], ex.aim[1]), q1 = P(ex.pt[0], ex.pt[1]); if (Math.hypot(q1.x - q0.x, q1.y - q0.y) >= S.minPx * dpr) { const ty = CONFIG.pitch.types[PM.type] || {}, late = ty.late || 2.4, N = 14;
       for (let i = 1; i < N; i++) { const u = i / N, w = Math.pow(u, late * 0.8), r = P(ex.aim[0] + b[0] * w, ex.aim[1] + b[1] * w); c.beginPath(); c.arc(r.x, r.y, S.dot * dpr, 0, 2 * Math.PI); c.fillStyle = 'rgba(' + S.path + ',' + (S.pathA * (0.35 + 0.65 * u)) + ')'; c.fill(); }
       const rr = Math.max(3 * dpr, Math.abs(P(ex.aim[0] + 0.35, ex.aim[1]).x - q0.x)); c.beginPath(); c.arc(q0.x, q0.y, rr, 0, 2 * Math.PI); c.strokeStyle = 'rgba(' + S.path + ',' + S.rel + ')'; c.lineWidth = 1.2 * dpr; c.stroke(); } /* (投げ出しの所: 曲がらない球が通る所 — 体の所から曲がって入る球が見える) */
