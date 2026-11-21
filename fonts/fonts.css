@@ -1,0 +1,5 @@
+/* 自前配信の書体(Google Fonts と同じ SIL Open Font License)。オフライン(Electron/PWA/ふりーむ)でも同じ見た目にする */
+@font-face{font-family:"DotGothic16";font-style:normal;font-weight:400;font-display:swap;src:url("DotGothic16-Regular.ttf") format("truetype");}
+@font-face{font-family:"Zen Kaku Gothic New";font-style:normal;font-weight:400;font-display:swap;src:url("ZenKakuGothicNew-Regular.ttf") format("truetype");}
+@font-face{font-family:"Zen Kaku Gothic New";font-style:normal;font-weight:500;font-display:swap;src:url("ZenKakuGothicNew-Medium.ttf") format("truetype");}
+@font-face{font-family:"Zen Kaku Gothic New";font-style:normal;font-weight:700;font-display:swap;src:url("ZenKakuGothicNew-Bold.ttf") format("truetype");}

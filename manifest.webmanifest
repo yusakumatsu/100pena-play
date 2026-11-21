@@ -1,0 +1,17 @@
+{
+  "name": "100ペナ 〜100年ペナント経営〜",
+  "short_name": "100ペナ",
+  "description": "球団を100年経営する野球シミュレーション",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c1410",
+  "theme_color": "#0c1410",
+  "lang": "ja",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
