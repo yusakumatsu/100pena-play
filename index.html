@@ -85980,8 +85980,8 @@ EVPX.SC.legdrop=function(A){ A.focus(109); /*EVTALL 机の主役と戸口の来�
     var lib=(!sh&&(o.wear||"uni")==="uni"&&o.no!=null&&o.no!=="")?A.chibi(Object.assign({},o,{pose:pose,dir:o.dir,mitt:false}),null):null;
     if(lib) for(var ny=26;ny<=31;ny++) for(var nx=8;nx<=18;nx++){ var X=nx+PAD; if(k._arm[ny*k.w+X]) continue; var a=lib.get(nx,ny), b=k.get(X,ny); if(a&&a!==b) k.px(X,ny,a); }
     if(rim) k.rim(rim.dx,rim.dy,rim.c,rim.k);
-    return k; }
-  var put=function(c,k,x,y){ c.blit(k,x-13-PAD,y-45); };
+    try{ k.__ekO={o:o, pose:pose}; }catch(eEk){} /*FIGEK-1012*/ return k; }
+  var put=function(c,k,x,y){ try{ if(k&&k.__ekO&&window.__ekFig&&window.__ekFig.put(k.__ekO,x,y,k)) return; }catch(eEk){} c.blit(k,x-13-PAD,y-45); }; /*FIGEK-1012*/
   /* 場面の座標で腕を描く上掛け(縁取りしてから貼る): 二人の腕が組み合う所に使う */
   function overlay(A,c,draw,dx){ var ov=new A.Cv(A.W,A.H); ov._arm={}; draw(ov); ov.outline(0.8); c.blit(ov,dx||0,0); } /* dx=横へずらして貼る(縦長の枠で寄せる時) */
 
@@ -86493,8 +86493,8 @@ EVPX.SC.hrderby=function(A){ A.focus(100); /*EVTALL 縦長の枠の見どころ 
     var lib=(!sh&&(o.wear||"uni")==="uni"&&o.no!=null&&o.no!=="")?A.chibi(Object.assign({},o,{pose:pose,dir:o.dir,mitt:false}),null):null;
     if(lib) for(var ny=26;ny<=31;ny++) for(var nx=8;nx<=18;nx++){ var X=nx+PAD; if(k._arm[ny*k.w+X]) continue; var a=lib.get(nx,ny), b=k.get(X,ny); if(a&&a!==b) k.px(X,ny,a); }
     if(rim) k.rim(rim.dx,rim.dy,rim.c,rim.k);
-    return k; }
-  var put=function(c,k,x,y){ c.blit(k,x-13-PAD,y-45); };
+    try{ k.__ekO={o:o, pose:pose}; }catch(eEk){} /*FIGEK-1012*/ return k; }
+  var put=function(c,k,x,y){ try{ if(k&&k.__ekO&&window.__ekFig&&window.__ekFig.put(k.__ekO,x,y,k)) return; }catch(eEk){} c.blit(k,x-13-PAD,y-45); }; /*FIGEK-1012*/
   function overlay(A,c,draw){ var ov=new A.Cv(A.W,A.H); ov._arm={}; draw(ov); ov.outline(0.8); c.blit(ov,0,0); }
   /* 練習着(オフ): 胴は球団色・ズボンは濃紺 */
   function offWear(A,o){ return Object.assign({wear:"pj",top:A.team,pants:"#2a2e3a",cap:false},o||{}); }
@@ -87315,8 +87315,8 @@ window.ODD_T1=[
     var lib=((o.wear||"uni")==="uni"&&o.no!=null&&o.no!=="")?A.chibi(Object.assign({},o,{pose:pose,dir:o.dir,mitt:false}),null):null;
     if(lib) for(var ny=26;ny<=31;ny++) for(var nx=8;nx<=18;nx++){ var X=nx+PAD; if(k._arm[ny*k.w+X]) continue; var a=lib.get(nx,ny), b=k.get(X,ny); if(a&&a!==b) k.px(X,ny,a); }
     if(rim) k.rim(rim.dx,rim.dy,rim.c,rim.k);
-    return k; }
-  var put=function(c,k,x,y){ c.blit(k,x-13-PAD,y-45); };
+    try{ k.__ekO={o:o, pose:pose}; }catch(eEk){} /*FIGEK-1012*/ return k; }
+  var put=function(c,k,x,y){ try{ if(k&&k.__ekO&&window.__ekFig&&window.__ekFig.put(k.__ekO,x,y,k)) return; }catch(eEk){} c.blit(k,x-13-PAD,y-45); }; /*FIGEK-1012*/
   /* 場面の座標で大きな人(神々・番人)を描く帳面。描き終えたら縁取り・縁の光を当てて貼る */
   function big(A){ var g=new A.Cv(A.W,A.H); g._arm={}; return g; }
   function fin(A,c,g,rim){ g.outline(0.8); if(rim) g.rim(rim.dx,rim.dy,rim.c,rim.k); c.blit(g,0,0); }
@@ -87813,8 +87813,8 @@ window.ODD_T2=[
     var lib=((o.wear||"uni")==="uni"&&o.no!=null&&o.no!=="")?A.chibi(Object.assign({},o,{pose:pose,dir:o.dir,mitt:false}),null):null;
     if(lib) for(var ny=26;ny<=31;ny++) for(var nx=8;nx<=18;nx++){ var X=nx+PAD; if(k._arm[ny*k.w+X]) continue; var a=lib.get(nx,ny), b=k.get(X,ny); if(a&&a!==b) k.px(X,ny,a); }
     if(rim) k.rim(rim.dx,rim.dy,rim.c,rim.k);
-    return k; }
-  var put=function(c,k,x,y){ c.blit(k,x-13-PAD,y-45); };
+    try{ k.__ekO={o:o, pose:pose}; }catch(eEk){} /*FIGEK-1012*/ return k; }
+  var put=function(c,k,x,y){ try{ if(k&&k.__ekO&&window.__ekFig&&window.__ekFig.put(k.__ekO,x,y,k)) return; }catch(eEk){} c.blit(k,x-13-PAD,y-45); }; /*FIGEK-1012*/
   /* 小道具 */
   function ball(c,x,y,A){ c.ell(x,y,1.6,1.6,"#f6f4ec"); c.px(Math.round(x)-1,Math.round(y),"#d84a3a"); c.px(Math.round(x)+1,Math.round(y)-1,"#d84a3a"); }
   function glove(k,x,y){ k.ell(x,y,3.6,3.2,"#8a5a2a"); k.rect(x-3,y-3,7,1,"#b07a44"); k.rect(x-2,y,5,1,"#5a3a1a"); k.px(x+3,y-2,"#5a3a1a"); }
@@ -88472,8 +88472,8 @@ window.ODD_T4=[
     var lib=((o.wear||"uni")==="uni"&&o.no!=null&&o.no!=="")?A.chibi(Object.assign({},o,{pose:"stand",dir:o.dir,mitt:false}),null):null;
     if(lib) for(var ny=26;ny<=31;ny++) for(var nx=8;nx<=18;nx++){ var X=nx+PAD; var a=lib.get(nx,ny), b=k.get(X,ny); if(a&&a!==b) k.px(X,ny,a); }
     if(rim) k.rim(rim.dx,rim.dy,rim.c,rim.k);
-    return k; }
-  var put=function(c,k,x,y){ c.blit(k,x-13-PAD,y-45); };
+    try{ k.__ekO={o:o, pose:null}; }catch(eEk){} /*FIGEK-1012*/ return k; }
+  var put=function(c,k,x,y){ try{ if(k&&k.__ekO&&window.__ekFig&&window.__ekFig.put(k.__ekO,x,y,k)) return; }catch(eEk){} c.blit(k,x-13-PAD,y-45); }; /*FIGEK-1012*/
   function overlay(A,c,draw){ var ov=new A.Cv(A.W,A.H); ov._arm={}; draw(ov); ov.outline(0.8); c.blit(ov,0,0); }
 
 EVPX.SC.irekae=function(A){ var c=A.cv, W=A.W, t=A.tone, I=A.info||{}, CA=I.ca||"#c8562a", CB=I.cb||"#2f4a8a", WIN=(I.win==="a"||I.win==="b")?I.win:null;
@@ -88568,8 +88568,8 @@ EVPX.SC.irekae=function(A){ var c=A.cv, W=A.W, t=A.tone, I=A.info||{}, CA=I.ca||
     if(lib) for(var ny=26;ny<=31;ny++) for(var nx=8;nx<=18;nx++){ var X=nx+PAD; if(k._arm[ny*k.w+X]) continue; var a=lib.get(nx,ny), b=k.get(X,ny); if(a&&a!==b) k.px(X,ny,a); }
     if(post) post(k);
     if(rim) k.rim(rim.dx,rim.dy,rim.c,rim.k);
-    return k; }
-  var put=function(c,k,x,y){ c.blit(k,x-13-PAD,y-45); };
+    try{ k.__ekO={o:o, pose:pose}; }catch(eEk){} /*FIGEK-1012*/ return k; }
+  var put=function(c,k,x,y){ try{ if(k&&k.__ekO&&window.__ekFig&&window.__ekFig.put(k.__ekO,x,y,k)) return; }catch(eEk){} c.blit(k,x-13-PAD,y-45); }; /*FIGEK-1012*/
   function overlay(A,c,draw){ var ov=new A.Cv(A.W,A.H); ov._arm={}; draw(ov); ov.outline(0.8); c.blit(ov,0,0); }
 
   /* ── 数字(背番号)。cx=中心・y=上・s=倍率・ol=縁の色 ── */
@@ -89210,8 +89210,8 @@ EVPX.SC.goodsinj=function(A){ var c=A.cv, W=A.W, t=A.tone, I=A.info||{}, EP=eraP
     if(lib) for(var ny=26;ny<=31;ny++) for(var nx=8;nx<=18;nx++){ var X=nx+PAD; if(k._arm[ny*k.w+X]) continue; var a=lib.get(nx,ny), b=k.get(X,ny); if(a&&a!==b) k.px(X,ny,a); }
     if(post) post(k);
     if(rim) k.rim(rim.dx,rim.dy,rim.c,rim.k);
-    return k; }
-  var put=function(c,k,x,y){ c.blit(k,x-13-PAD,y-45); };
+    try{ k.__ekO={o:o, pose:pose}; }catch(eEk){} /*FIGEK-1012*/ return k; }
+  var put=function(c,k,x,y){ try{ if(k&&k.__ekO&&window.__ekFig&&window.__ekFig.put(k.__ekO,x,y,k)) return; }catch(eEk){} c.blit(k,x-13-PAD,y-45); }; /*FIGEK-1012*/
   function overlay(A,c,draw){ var ov=new A.Cv(A.W,A.H); ov._arm={}; draw(ov); ov.outline(0.8); c.blit(ov,0,0); }
   /* 画素の地図を描く。pal=文字→色(無い文字は透明) */
   function pmap(k,x0,y0,rows,pal){ for(var j=0;j<rows.length;j++){ var r=rows[j]; for(var i=0;i<r.length;i++){ var c=pal[r.charAt(i)]; if(c) k.px(x0+i,y0+j,c); } } }
@@ -89714,7 +89714,7 @@ window.EVPX_OS={figure:figure, put:put, overlay:overlay, pmap:pmap, limb:limb, h
   var call=function(n){ return function(){ return OS()[n].apply(null,arguments); }; };
   var figure=call("figure"), overlay=call("overlay"), limb=call("limb"), hand=call("hand"), armCol=call("armCol"), osameHead=call("osameHead"), osameFig=call("osameFig"),
     star=call("star"), capItem=call("capItem"), plush=call("plush"), foldTowel=call("foldTowel"), box=call("box"), pointer=call("pointer"), tiny=call("tiny");
-  var put=function(c,k,x,y){ c.blit(k,x-13-PAD,y-45); };
+  var put=function(c,k,x,y){ try{ if(k&&k.__ekO&&window.__ekFig&&window.__ekFig.put(k.__ekO,x,y,k)) return; }catch(eEk){} c.blit(k,x-13-PAD,y-45); }; /*FIGEK-1012*/
   var put30=function(c,k,x,y){ c.blit(k,x-15,y-45); };
   function pmap(k,x0,y0,rows,pal){ for(var j=0;j<rows.length;j++){ var r=rows[j]; for(var i=0;i<r.length;i++){ var cc=pal[r.charAt(i)]; if(cc) k.px(x0+i,y0+j,cc); } } }
   /* 窓の中だけに描く(はみ出し防止) */
@@ -91828,8 +91828,8 @@ window.DUG_PROPS=window.DUG_PROPS||{};
     if(lib) for(var ny=26;ny<=31;ny++) for(var nx=8;nx<=18;nx++){ var X=nx+PAD; if(k._arm[ny*k.w+X]) continue; var a=lib.get(nx,ny), b=k.get(X,ny); if(a&&a!==b) k.px(X,ny,a); }
     if(post) post(k);
     if(rim) k.rim(rim.dx,rim.dy,rim.c,rim.k);
-    return k; }
-  var put=function(c,k,x,y){ c.blit(k,x-13-PAD,y-45); };
+    try{ k.__ekO={o:o, pose:pose}; }catch(eEk){} /*FIGEK-1012*/ return k; }
+  var put=function(c,k,x,y){ try{ if(k&&k.__ekO&&window.__ekFig&&window.__ekFig.put(k.__ekO,x,y,k)) return; }catch(eEk){} c.blit(k,x-13-PAD,y-45); }; /*FIGEK-1012*/
   /* 長い影(足もとから光と反対へ伸ばす)。dx,dy=影の先の向き */
   function longShadow(c,x,y,dx,dy,w,a){ c.poly([x-w,y,x+w,y,x+w*0.6+dx,y+dy,x-w*0.6+dx,y+dy-1],"#1a1020",a==null?0.3:a); }
   function ball(c,x,y,lit){ c.rect(x,y,2,2,"#f2efe6"); c.px(x+1,y+1,"#c8c2b4"); c.px(x,y,lit||"#fff8ec"); c.px(x+1,y,"#d85a5a",0.6); }
@@ -93020,7 +93020,7 @@ EVPX.SC.tbmori=function(A){ var c=A.cv, W=A.W, t=A.tone;
       [[4,TOP+21,3,TOP+12],[3,TOP+12,7,TOP+4],[7,TOP+4,11,TOP+1],[21,TOP+21,22,TOP+12],[22,TOP+12,18,TOP+4],[18,TOP+4,14,TOP+1]].forEach(function(l,j){
         for(var w=0;w<3;w++) k.line(LX+l[0]+(j<3?w:-w),l[1],LX+l[2]+(j<3?w:-w),l[3],(j%3===0)?U:((j%3===1)?Ud:S)); });
       k.ell(LX+12.5,TOP+0.5,4.2,3.2,GL); k.ell(LX+12,TOP-0.5,2.6,1.6,t(GL,0.3)); k.rect(LX+9,TOP+3,8,1,t(GL,-0.3)); }
-    return k; }
+    try{ k.__ekO={o:o, pose:null}; }catch(eEk){} /*FIGEK-1012*/ return k; }
 
   /* ── 金の像に置き換えて縮める。返す帳面の足の裏の下=(round(13*s), round(53*s)) ── */
   /* 部位ごとの金の段: 肌はどの選手も同じ明るさの金(肌の色で像の明るさが変わらないように)、髪は一段古い金、ユニフォームは明るい金。
@@ -94190,9 +94190,9 @@ EVPX.SC.tbmori=function(A){ var c=A.cv, W=A.W, t=A.tone;
     k.outline(0.8);
     var bottom=0; for(var yy=k.h-1;yy>=0&&!bottom;yy--) for(var xx=0;xx<k.w;xx++) if(k.op(xx,yy)){ bottom=yy; break; }
     return {k:k, bottom:bottom, cx:PAD+13, map:map}; }
-  var put=function(c,F,x,fy){ c.blit(F.k,R(x-F.cx),R(fy-F.bottom)); };
+  var put=function(c,F,x,fy){ try{ if(F&&F.__ekKid&&window.__ekFig&&window.__ekFig.kid&&window.__ekFig.kid(F.__ekKid,x,fy,F)) return; }catch(eK){} c.blit(F.k,R(x-F.cx),R(fy-F.bottom)); }; /*KIDSEK-1013*/
   /* 人物の層(ゆっくり弾む)に置く。使えない時は背景にそのまま描く */
-  function layer(A,F,x,fy,mode){ var left=R(x-F.cx), top=R(fy-F.bottom); try{ var s=A.sprite({pose:"stand",rot:1,blink:false,expr:"smile",cap:false},left+24,top+13,mode||"C"); if(!s||s.ox!==left||s.oy!==top) throw 0; s.w=F.k.w; s.h=F.k.h; s.d=F.k.d; }catch(e){ A.cv.blit(F.k,left,top); } }
+  function layer(A,F,x,fy,mode){ try{ if(F&&F.__ekKid&&window.__ekFig&&window.__ekFig.kid&&window.__ekFig.kid(F.__ekKid,x,fy,F)) return; }catch(eK){} /*KIDSEK-1013*/ var left=R(x-F.cx), top=R(fy-F.bottom); try{ var s=A.sprite({pose:"stand",rot:1,blink:false,expr:"smile",cap:false},left+24,top+13,mode||"C"); if(!s||s.ox!==left||s.oy!==top) throw 0; s.w=F.k.w; s.h=F.k.h; s.d=F.k.d; }catch(e){ A.cv.blit(F.k,left,top); } }
 
   /* ── たーちゃんズの面々(顔の型の服と小物) ── */
   var KID={
@@ -94204,9 +94204,9 @@ EVPX.SC.tbmori=function(A){ var c=A.cv, W=A.W, t=A.tone;
     toku:{o:{hair:"black",hairStyle:"short",skin:1,top:"#f2f0ea",pants:"#3a3a48"},f:{stripe:"#2a3a6a",shorts:true,size:"m"}},
     shii:{o:{hair:"brown",hairStyle:"short",skin:0,top:"#d8883a",pants:"#4a5a8a"},f:{shorts:true,size:"s"}}
   };
-  function kid(A,name,over,fover){ var K=KID[name]; return fig(A,Object.assign({},K.o,over||{}),Object.assign({},K.f,fover||{})); }
+  function kid(A,name,over,fover){ var K=KID[name]; var F=fig(A,Object.assign({},K.o,over||{}),Object.assign({},K.f,fover||{})); try{ F.__ekKid=name; F.__ekO=Object.assign({},K.o,over||{}); }catch(eK){} return F; } /*KIDSEK-1013*/
   /* たーちゃん: 背が高い・坊主・顔が長い・たらこの口・白いランニング・つぎの当たった作業ズボン。props で持ち物 */
-  function tachan(A,over,props,rim){ return fig(A,Object.assign({hair:"black",hairStyle:"buzz",skin:2,top:"#f4f2ea",pants:"#6a6656",expr:"neutral"},over||{}),{tank:true,tall:true,patch:[[8,38,"#7e7a68"]],props:props,rim:rim}); }
+  function tachan(A,over,props,rim){ var F=fig(A,Object.assign({hair:"black",hairStyle:"buzz",skin:2,top:"#f4f2ea",pants:"#6a6656",expr:"neutral"},over||{}),{tank:true,tall:true,patch:[[8,38,"#7e7a68"]],props:props,rim:rim}); try{ F.__ekKid="ta"; F.__ekO=over||{}; }catch(eK){} return F; } /*KIDSEK-1013*/
   /* プラスチックのバット(黄色・握りは赤)と白いボール */
   function pbat(k,x0,y0,x1,y1){ k.line(x0,y0,x1,y1,"#f0d040"); k.line(x0+1,y0,x1+1,y1,"#c8a828"); var gx=x0+(x1-x0)*0.2, gy=y0+(y1-y0)*0.2; k.line(x0,y0,R(gx),R(gy),"#d83a3a"); k.px(x1,y1,"#f8e070"); k.px(x1+1,y1,"#f8e070"); }
   function pball(k,x,y){ k.rect(x,y,3,3,"#f4f2ee"); k.px(x,y,"#ffffff"); k.px(x+2,y+2,"#c8c4bc"); k.px(x+1,y+1,"#d8d4cc"); }
@@ -103819,6 +103819,7 @@ if(!setup()){ let _n=0; const t=setInterval(function(){ if(setup()||++_n>120) cl
       ps.push(p); });
     return {name:T("たーちゃんズ","The Ta-chans"), players:ps, rotIdx:0};
   };
+  try{ window.kfxKidsTeam=kidsTeam; }catch(eKt){} /*KIDSEK-1013 一枚絵の子どもを Swing Maker で描く時に、試合と同じ名簿を作る (kfix_rt_zi_smkit.js の kidInit) */
   /* 自軍の看板の打者(構えのまね「俺○○の構えやるから」) */
   const starName=function(){ try{ const b=(GM.team.players||[]).filter(function(p){ return p&&p.role!=="P"&&p.squad===1; }).sort(function(a,b){ return (b.pop||0)-(a.pop||0); })[0]; return b? b.name : null; }catch(e){ return null; } };
   const UNI={main:'#f2efe6', acc:'#6a6a6a', pat:0, sec:'#a8a8a8', ud:null}; /* 普段着(白いシャツ) */
@@ -112093,26 +112094,64 @@ window._kfzOn=1;
   var KS={ ostand:{s:1.55}, press:{s:1.35, sink:8, clip:72}, retire:{s:1.45}, awards:{s:1.15, aw:true, mv:0.86}, gmOffice:{s:1.4, behind:{y:90, sink:4, clip:76}}, airport:{s:1.4, hideX:true},
     /* 11/21 a 組 (主役と背広の人だけの場面) のうち、そのまま使える物 */
     callupKeep:{s:1.4}, found:{s:1.3}, in_kouhou:{s:1.4}, indie:{s:1.4}, inv_maked_lose:{s:1.4}, inv_satsuma_lose:{s:1.4}, inv_sogen_lose:{s:1.4},
-    kubizuka:{s:1.3}, locker:{s:1.4}, odd1_aurora:{s:1.4}, odd1_camel:{s:1.4}, odd2_titan:{s:1.3}, odd4_blackhole:{s:1.4}, odd4_dimension:{s:1.4}, odd4_linguist:{s:1.4},
-    odd4_marsdust:{s:1.3}, odd4_pulsar:{s:1.4}, odd4_ringice:{s:1.3}, odd4_zerog:{s:1.4}, om_map:{s:1.4}, om_observatory:{s:1.4}, om_penlight:{s:1.4}, om_shadows:{s:1.4}, om_starloss:{s:1.4},
+    kubizuka:{s:1.0, ghost:true},   /* 塚の上の霊 → 半透明 */ locker:{s:1.4}, odd1_aurora:{s:1.4}, odd1_camel:{s:1.4}, odd2_titan:{s:1.3}, odd4_blackhole:{s:1.4}, odd4_dimension:{s:1.4}, odd4_linguist:{s:1.4},
+    odd4_marsdust:{s:1.0}, odd4_pulsar:{s:1.0}, odd4_ringice:{s:1.0}, odd4_methane:{s:1.0},   /* 宇宙服の泡はちびの頭の高さ → 選手を小さくして頭を泡に */ odd4_zerog:{s:1.4}, om_map:{s:1.4}, om_observatory:{s:1.4}, om_penlight:{s:1.4}, om_shadows:{s:1.4}, om_starloss:{s:1.4},
     /* 手直し: 頭が枠から出る → 小さく・机の向こうの人 → 沈めて切る */
-    in_dynasty:{s:1.0}, rojo:{s:0.7}, ownerRoom:{s:1.2, behind:{y:90, sink:6, clip:74}}, nego:{s:1.4, sink:6, clip:67},
+    in_dynasty:{s:1.0}, rojo:{s:0.7}, ownerRoom:{s:1.2, behind:{y:90, sink:6, clip:74}}, nego:{s:1.4, sink:3}   /* 机は脚だけの素通し → 切らない */,
     /* c 組 (背広の人だけ) */
-    inv_oshikura_o3:{s:1.4}, kfx_bank:{s:1.35}, kfx_succ:{s:1.4}
+    inv_oshikura_o3:{s:1.4}, kfx_succ:{s:1.4},
+    /* 11/22 ちびを直に描く場面: noChibi = その場面のちびを透明に・add = 置く人 (who: cast0 = 主役 / x = 名簿から / arr = いちばん新しいアレンジ選手。x,y = 足もと・絵の 224x105) */
+    arrange:{s:1.25, noChibi:true, add:[{who:"arr", x:112, y:93, pose:"stand", dir:"front", css:"holo"}]},
+    /* shumei (襲名) は裃で正座してお辞儀する手描きの 5 人 (11/22 松田さん「いろいろおかしい」) → 今のまま (EXCL) */
+    odd1_wrestle:{s:1.4, noChibi:true, noFront:true},   /* 組み合う腕と帯は手前の層に手描き → 相手を隠すと腕が宙に残る */
+    goodsfort:null
     /* b 組 (主役のほかに相手の選手・医者・現地の人などのちびがいる 36 場面) と inv_sogen_f1 は、絵柄が混ざるのでちびのまま (11/21) */
     /* ちびのまま (絵柄が混ざる・形が無い): chashitsu (正座)・odd1_blowpipe/cannon/dogsled/river/sling/wrestle (現地の人)・shikyu (投手と捕手) */
   };
   var K=5;            /* 絵の座標 1 あたりのドット。一枚絵は PC で幅 1000〜1400px (座標 1 = 4.5〜6px) なので、ほぼ画面の 1px = 1 ドット。2 だと胸の文字や柄が潰れた (11/21 松田さん) */
-  var POSE={ phone:"phone", guts:"guts", bouquet:"bouquet", point:"point", up:"guts", banzai:"guts", hands:"guts", wave:"hat", bow:"bow", cry:"cry", cover:"cover", shake:"shake", sit:"sit" };
+  var POSE={ cross:"stand", squat:"sit", seiza:"sit", bat:"stand", cheer:"guts", head:"cover", spread:"stand", glove:"stand", hold:"stand", walk:"stand", set:"stance", bag:"stand", phone:"phone", guts:"guts", bouquet:"bouquet", point:"point", up:"guts", banzai:"guts", hands:"guts", wave:"hat", bow:"bow", cry:"cry", cover:"cover", shake:"shake", sit:"sit" };
   var on=function(){ try{ if(window.__ekForce&&window.kfxKit) return true; /* 検査の道具が絵だけ確かめる時 */ if(window._QAP||!window.kfxKit) return false; if(window.SMLIVE&&(SMLIVE.dead||(SMLIVE.on&&!SMLIVE.on()))) return false; return true; }catch(e){ return false; } };
+  /* ちびの表情 → 部品の枠の表情の名前 (11/22 Mac に頼み中) */
+  var EXPR={ smile:"smile", grin:"grin", cry:"cry", shock:"surprise", surprise:"surprise", angry:"angry", serious:"serious", closed:"closed", sly:"sly", sad:"sad", neutral:"neutral", happy:"smile", laugh:"grin" };
+  var KIDTC={ ta:"ta", hino:"hino", mii:"mi", ken:"ken", yuu:"yuu", maa:"maa", toku:"tokkun", shii:"shi" };
   var N=0, REC={}, RECN=[];
+  /* 11/22 松田さん「もうチビキャラ使いたくない (納めちゃん・箱谷のような固有キャラ以外)」:
+     表に無い場面も既定で差し替える (EXCL = 固有キャラ・ちびを直に描く場面は外す)。
+     名もないユニフォームの人 = 名簿の本物の選手 (相手の球団の人 = 相手の選手)・背広 = 部品の枠の背広・私服/着物/白衣ほか = 描けないので隠す (Mac に頼み済み) */
+  var EXCL=/^(osame|oshida|goods|hako|kfx_m_|fundlow|hrderby|irekae|kfw_draft|legdrop|letter|odd1_river|odd2_immortal|shumei|tbball|tbmori|tbzen|tgate|chashitsu|tbuni|tbnine|kfxfraud|in_champ|classmate|warpack|callupDown|in_kouhou|kfx_bank|tryout)/;   /* 11/22 見比べで、元の作り (動きのコマを重ねる・裃・座る・机) と合わなかった場面は今の絵に戻す */
+  var CIV=/^(casual|kimono|trench|coat|pj|plain|dress|army|jacket)$/;
+  /* 11/22 松田さん「とにかくトライできるだけトライ」: 描けない人は隠さずに、今ある体で代わりに描く */
+  var CIVBODY={ casual:"press", coat:"press", dress:"press", plain:"press", jacket:"press", kimono:"owner", trench:"owner", pj:"coach", army:"coach" };
+  var civStaff=function(o){ return CIVBODY[String(o&&o.wear||"")]||"press"; };
+  /* 11/22 見比べで良かった場面だけ (表に無い場面は差し替えない)。合わなかった場面 (座る・寝る・正座・道具を構える・組み合う・机) は、Mac の形と私服の人が届いてから */
+  var OKX={ airport:1, brawl:1, bullpen:1, callupKeep:1, callupStay:1, dugout:1, fanback:1, found:1, in_gogai:1, in_mist:1, in_swar:1, in_dynasty:1, in_rev:1, indie:1, convert:1, coachdemand:1, jikiso:1, gmOffice:1,
+    inv_maked_ch:1, inv_maked_lose:1, inv_oshikura_o3:1, inv_satsuma_ch:1, inv_satsuma_f1:1, inv_satsuma_lose:1, inv_sogen_f1:1, inv_sogen_lose:1, kaijin:1, kfx_succ:1, locker:1, medreturn:1,
+    odd0_bear:1, odd0_falls:1, odd0_fuku:1, odd0_mats:1, odd0_taue:1, odd0_tuna:1, odd1_aurora:1, odd1_camel:1, odd2_ferryman:1, odd2_labyrinth:1, odd2_thunder:1, odd2_titan:1, odd2_oneeye:1,
+    odd3_crater:1, odd3_eight:1, odd3_mole:1, odd3_squid:1, odd3_hail:1, odd3_tornado:1, odd4_blackhole:1, odd4_dimension:1, odd4_zerog:1, odd4_linguist:1,
+    om_formation:1, om_gaze:1, om_shadows:1, om_starloss:1, om_port:1, ostand:1, press:1, retire:1, rojo:1, awards:1, arrange:1, tc_intro:1 };
+  var ksOf=function(key){ if(KS[key]===null) return null; if(!OKX[key]) return null; if(KS[key]) return KS[key]; if(EXCL.test(key)||!window.EVPX||!EVPX.SC[key]) return null; KS[key]={s:1.4, auto:1}; return KS[key]; };
+  var hashS=function(t){ var h=7; t=String(t); for(var i=0;i<t.length;i++) h=(h*31+t.charCodeAt(i))>>>0; return h; };
+  /* 名もないユニフォームの人に当てる選手: 主役と重ならない 1 軍から、場面ごとに決まった順で */
+  var pickX=function(key, o, cast, used){ try{
+      var away=!!(o&&o.away), T=null;
+      if(away){ var cs=((GM.league&&GM.league.clubs)||[]).filter(function(c){ return c&&c.team&&c.team!==GM.team; }); if(cs.length) T=cs[hashS(key)%cs.length].team; }
+      else T=GM.team;
+      if(!T) return null;
+      var L=(T.players||[]).filter(function(p){ return p&&p.squad===1&&(cast||[]).indexOf(p)<0&&used.indexOf(p)<0; }).sort(function(a,b){ return (a.id|0)-(b.id|0); });
+      if(!L.length) return null; var q=L[(hashS(key)+used.length*7)%L.length]; used.push(q); return q; }catch(e){ return null; } };
   var wrap=function(){ try{
     if(!window.EVPX||typeof EVPX.render!=="function"||EVPX.render._kfEk) return;
     var _r=EVPX.render;
     var w=function(key, cast){
-      if(!KS[key]||!on()||!EVPX.SC[key]) return _r.apply(this, arguments);
-      var rec=[], sc=EVPX.SC[key], html="";
-      EVPX.SC[key]=function(A){ var sp=A.sprite;
+      if(!on()||!ksOf(key)) return _r.apply(this, arguments);
+      var rec=[], sc=EVPX.SC[key], html="", used=[], hid=0;
+      EVPX.SC[key]=function(A){ var sp=A.sprite, pt=A.put;
+        /* 背景に直に焼く人 (A.put): 焼かずに書き留める (差し替える札が無いので、絵は背景のすぐ上に入れる) */
+        A.put=function(o,x,y){ try{ var ci=(o&&o.__ci!=null)? o.__ci : null, p=(ci!=null&&cast)? cast[ci] : null, suit=!!(o&&o.wear==="suit");
+            if(!p&&!suit&&CIV.test(String(o&&o.wear||""))){ rec.push({id:"kitp"+(++N), o:o, x:x, y:y, mid:!!(o.rot||o.toss), p:null, staff:civStaff(o), civ:true, put:true, xtra:true}); return {w:26,h:48}; }
+            if(!p&&!suit) p=pickX(key,o,cast,used);
+            if(p||suit){ rec.push({id:"kitp"+(++N), o:o, x:x, y:y, mid:!!(o.rot||o.toss), p:p, staff:(p? null : "owner"), put:true, xtra:(ci==null)}); return {w:26,h:48}; }
+          }catch(e){ swl(e); } return pt.apply(this, arguments); };
         A.sprite=function(o,x,y,mode){ try{
             var ci=(o&&o.__ci!=null)? o.__ci : null, p=(ci!=null&&cast)? cast[ci] : null, suit=!!(o&&o.wear==="suit");
             /* 表彰式: 受賞者 1 人を「歩いて来る絵 (AwH)」と「着いて掲げる絵 (AwU・MVP は AwMv)」の 2 枚で描き、トロフィーは絵に焼く。
@@ -112124,13 +112163,34 @@ window._kfzOn=1;
               var id2="kit"+(++N); rec.push({id:id2, o:Object.assign({}, o, {pose:"guts"}), x:x+L0, y:y+T0, mid:false, p:p, staff:null, troph:cat, lead:mv});
               return sp.call(this, o, x, y, md+" "+id2+" ekH"); }
             /* hideX = 球団の人でない人 (見送りのファン) は隠す (11/21 松田さん「ファンを隠そう」・描けないとちびのまま絵柄が合わない)。差し替えに失敗した時だけ戻る */
-            if(KS[key]&&KS[key].hideX&&!p&&!suit) return sp.call(this, o, x, y, "S ekOff");
-            if(p||(suit&&ci==null)){ var id="kit"+(++N); rec.push({id:id, o:o, x:x, y:y, mid:!!(o.rot||o.toss), p:p, staff:(p? null : "owner")}); return sp.call(this, o, x, y, "S "+id+" ekH"); }
+            if(KS[key]&&KS[key].hideX&&!p&&!suit){ hid++; return sp.call(this, o, x, y, "S ekOff"); }
+            if(!p&&!suit&&CIV.test(String(o&&o.wear||""))){ var idc="kit"+(++N); rec.push({id:idc, o:o, x:x, y:y, mid:!!(o.rot||o.toss), p:null, staff:civStaff(o), civ:true, xtra:true}); return sp.call(this, o, x, y, "S "+idc+" ekH"); }   /* 私服・着物・白衣ほか: 代わりの体 */
+            var xtra=false; if(!p&&!suit){ var oa=(o&&!o.away&&o.team&&A.team&&o.team!==A.team)? Object.assign({},o,{away:true}) : o; p=pickX(key,oa,cast,used); xtra=!!p; }   /* 自軍と違う色の人 = 相手の選手 */
+            if(p||suit){ var id="kit"+(++N); rec.push({id:id, o:o, x:x, y:y, mid:!!(o.rot||o.toss), p:p, staff:(p? null : "owner"), xtra:xtra||(ci==null&&!suit)}); return sp.call(this, o, x, y, "S "+id+" ekH"); }
           }catch(e){ swl(e); }
           return sp.apply(this, arguments); };
-        try{ sc(A); } finally{ A.sprite=sp; } };
+        /* 手作りの体 (figure → put・patch_1012): 置く時に札を見て、背景に焼かずに書き留める。球団の色も背番号も無い人 (現地の人) は隠す */
+        var ksN=KS[key]||{}, chN=A.chibi, frN=A.front;
+        if(ksN.noFront&&frN) A.front=function(){ return new A.Cv(A.W, A.H||105); };
+        if(ksN.noChibi&&chN) A.chibi=function(o){ var k=chN.apply(this,arguments); try{ if(k&&k.d&&!(o&&(o.raw||o.keep))) k.d.fill(0); }catch(e){} return k; };
+        var prevF=window.__ekFig;
+        window.__ekFig={ kid:function(nm,x,fy,F){ try{ var tc=KIDTC[nm]; if(!tc||!window.kfxKit||!kfxKit.kid) return false; var o=(F&&F.__ekO)||{};
+              rec.push({id:"kitk"+(++N), o:Object.assign({}, o, {dir:o.dir||1}), x:x, y:fy, mid:false, p:null, staff:null, put:true, xtra:true, kid:tc}); return true; }catch(e){ swl(e); } return false; },
+          put:function(ek,x,y){ try{ var o=(ek&&ek.o)||{}, ci=(o.__ci!=null)? o.__ci : null, p=(ci!=null&&cast)? cast[ci] : null, suit=(o.wear==="suit");
+            if(!p&&!suit&&(CIV.test(String(o.wear||""))||!(o.team||o.logo||(o.no!=null&&o.no!=="")))){ rec.push({id:"kitf"+(++N), o:Object.assign({}, o, {pose:(ek.pose||o.pose)}), x:x, y:y, mid:!!(o.rot||o.toss), p:null, staff:civStaff(o), civ:true, put:true, xtra:true}); return true; }
+            if(!p&&!suit) p=pickX(key,o,cast,used);
+            if(p||suit){ rec.push({id:"kitf"+(++N), o:Object.assign({}, o, {pose:(ek.pose||o.pose)}), x:x, y:y, mid:!!(o.rot||o.toss), p:p, staff:(p? null : "owner"), put:true, xtra:(ci==null)}); return true; }
+          }catch(e){ swl(e); } return false; } };
+        try{ sc(A); } finally{ A.sprite=sp; A.put=pt; window.__ekFig=prevF; if(chN) A.chibi=chN; if(frN) A.front=frN; }
+        /* 置く人 (add) */
+        try{ (ksN.add||[]).forEach(function(a){ var p=null;
+            if(a.who==="cast0") p=cast&&cast[0];
+            else if(a.who==="arr"){ var L=(GM.team&&GM.team.players||[]).filter(function(q){ return q&&q.arranged; }); p=L.length? L[L.length-1] : null; if(!p) p=pickX(key,{},cast,used); }
+            else p=pickX(key,{},cast,used);
+            if(p) rec.push({id:"kita"+(++N), o:{pose:a.pose, dir:1, expr:a.expr||""}, x:a.x, y:a.y, mid:false, p:p, staff:null, put:true, xtra:true, dirF:a.dir, css:a.css||""}); }); }catch(eA){ swl(eA); } };
       try{ html=_r.apply(this, arguments); }catch(e){ swl(e); html=""; } finally{ EVPX.SC[key]=sc; }
-      if(!html||!rec.length) return html||_r.apply(this, arguments);
+      if(!html) return _r.apply(this, arguments);
+      if(!rec.length){ return hid? html.replace('<div class="evsc ', '<div data-ek="ek0" class="evsc ') : html; }   /* 隠す人だけの場面: 印だけ付ける (ekOff が効くように) */
       var tag="ek"+(++N); html=html.replace('<div class="evsc ', '<div data-ek="'+tag+'" class="evsc ');
       REC[tag]={key:key, rec:rec, cast:(cast||[]).slice()}; RECN.push(tag); if(RECN.length>80) delete REC[RECN.shift()];
       try{ setTimeout(scan, 0); }catch(e){ swl(e); }
@@ -112179,39 +112239,41 @@ window._kfzOn=1;
   var pc=function(v,t){ return (v/t*100).toFixed(3)+"%"; };
 
   var fill=function(root){ try{
-    if(!root||root._ekDone||root._ekRun) return; var tag=root.getAttribute("data-ek"), R=REC[tag]; if(!R){ root.classList.add("ekFail"); root._ekDone=1; return; }
+    if(!root||root._ekDone||root._ekRun) return; var tag=root.getAttribute("data-ek"), R=REC[tag]; if(tag==="ek0"){ root._ekDone=1; return; } if(!R){ root.classList.add("ekFail"); root._ekDone=1; return; }
     root._ekRun=1; var key=R.key, rec=R.rec, cast=R.cast;
     var AW=EVPX.AW||224, AH=EVPX.AH||105, S=(KS[key]&&KS[key].s)||1.4;
     var els=rec.map(function(r){ return root.querySelector("."+r.id); });
     var show=function(){ root.classList.add("ekFail"); };
-    var giveUp=setTimeout(function(){ if(!root._ekDone){ root._ekDone=1; show(); } }, 15000);
+    var giveUp=setTimeout(function(){ if(!root._ekDone){ root._ekDone=1; show(); } }, 45000);   /* 部品の枠は 1 つずつ描くので、人の多い場面が続くと待ちが長い */
     var hDots=Math.round(45*S/0.9*K);
     var my0=(GM.team&&GM.team.players||[])[0];
     Promise.all(rec.map(function(r){
       var pose=POSE[r.o.pose]||(r.o.expr==="cry"? "cry" : "stand"); if(r.o.mic) pose="mic"; /* 97g123 マイクを前へ差し出す形 */
-      var lead=(r.lead!=null)? r.lead : !!(r.p&&cast&&r.p===cast[0]&&!(KS[key]&&KS[key].aw));
-      var dir=(lead&&pose!=="point")? "front" : "diag";
+      var lead=(r.lead!=null)? r.lead : !!(!r.xtra&&r.p&&cast&&r.p===cast[0]&&!(KS[key]&&KS[key].aw));
+      var dir=r.dirF||((lead&&pose!=="point")? "front" : "diag");
       if(r.mid){ pose="douage"; dir="side"; }
-      var who=r.p||my0; if(!who) return Promise.resolve(null);
+      var who=r.p||my0; if(!who&&!r.kid) return Promise.resolve(null);
       var rs=(r.lead&&KS[key]&&KS[key].mv)? KS[key].mv : 1; /* 表彰式の MVP は台の上なので少し小さく (杯が横断幕にかからない) */
-      var opt={pose:pose, dir:dir, ppm:Math.round(45*S*K/1.8*rs), px:1}; if(r.staff){ opt.staff=(r.o.mic&&!r.p)? "press" : r.staff; /* マイクの人は記者 (97g123) */ var si=rec.filter(function(q){ return q.staff; }).indexOf(r);
-        opt.owner={ name:key+"#"+si, id:"ek|"+key+"|"+si, age:(r.o.hair==="gray"||r.o.hairStyle==="bald")? 64 : (si? 46 : 54), female:!!r.o.female }; } /* 背広の人ごとに別の顔 */
+      var opt={pose:pose, dir:dir, ppm:Math.round(45*S*K/1.8*rs), px:1}; var ex=EXPR[String(r.o.expr||"")]; if(ex) opt.expr=ex; /* ちびに付いていた表情を送る */ if(r.staff){ opt.staff=(r.o.mic&&!r.p)? "press" : r.staff; /* マイクの人は記者 (97g123) */ var si=rec.filter(function(q){ return q.staff; }).indexOf(r);
+        var fv={ name:key+"#"+si, id:"ek|"+key+"|"+si, age:(r.o.hair==="gray"||r.o.hair==="white"||r.o.hairStyle==="bald")? 66 : (si? 34+(si*7)%20 : 54), female:!!(r.o.female||r.o.fem) };
+        if(opt.staff==="press") opt.press=fv; else if(opt.staff==="owner") opt.owner=fv; } /* 背広の人ごとに別の顔 */
       /* 背広の人: ちびの髪 (白髪 / 黒・茶) に合う顔が出るまで名前を変えて描かせる (顔は名前の種で決まる・年では髪の色は変わらない) */
       var want=(r.staff&&r.o)? ((/gray|white|silver/.test(String(r.o.hair||""))||r.o.hairStyle==="bald")? "gray" : (/black|brown/.test(String(r.o.hair||""))? "dark" : null)) : null;
-      var tryOne=function(n){ var o2=opt; if(r.staff&&n>0) o2=Object.assign({}, opt, {owner:Object.assign({}, opt.owner, {name:opt.owner.name+"~"+n, id:opt.owner.id+"~"+n})});
-        var img0=null; return kfxKit.player(who, o2).then(function(img){ img0=img; return img? load(img.url) : null; }).then(function(im){ if(!im) return null;
-          if(want&&n<5&&hairOf(im)!==want) return tryOne(n+1).then(function(v){ return v||{r:r, im:im, dir:dir, pts:img0&&img0.pts}; });
-          return {r:r, im:im, dir:dir, pts:img0&&img0.pts}; }); };
+      var tryOne=function(n){ var o2=opt, fk=opt.owner? "owner" : (opt.press? "press" : null); if(r.staff&&n>0&&fk){ o2=Object.assign({}, opt); o2[fk]=Object.assign({}, opt[fk], {name:opt[fk].name+"~"+n, id:opt[fk].id+"~"+n}); }
+        var img0=null; return (r.kid? kfxKit.kid(r.kid, o2) : kfxKit.player(who, o2)).then(function(img){ img0=img; return img? load(img.url) : null; }).then(function(im){ if(!im) return null;
+          if(want&&n<5&&hairOf(im)!==want) return tryOne(n+1).then(function(v){ return v||{r:r, im:im, dir:dir, pts:img0&&img0.pts, pose:pose}; });
+          return {r:r, im:im, dir:dir, pts:img0&&img0.pts, pose:pose}; }); };
       return tryOne(0);
     })).then(function(out){
       if(root._ekDone) return; root._ekDone=1; clearTimeout(giveUp);
       if(!document.body.contains(root)) return;
-      out.forEach(function(v, i){ var el=els[i]; if(!el) return;
-        if(!v){ el.classList.remove("ekH"); return; }
+      out.forEach(function(v, i){ var el=els[i]; if(!el&&!rec[i].put) return;
+        if(!v){ if(el) el.classList.remove("ekH"); return; }
         var r=v.r, im=v.im, d=pix(im), wU=im.width/K, hU=im.height/K, flip=(r.o.dir===-1&&v.dir!=="front");
         var left, top;
         var opt=KS[key]||{}; if(opt.behind&&r.y<=opt.behind.y) opt=Object.assign({}, opt, opt.behind); /* behind = 足もとが y 以下 (机の向こう) の人だけ沈めて切る */
-        if(r.mid){ left=r.x-wU/2; top=r.y-hU/2; } else { var P0=v.pts||{}, fy=(P0.foot&&P0.foot[1]!=null)? P0.foot[1] : footOf(im,d); left=r.x-wU/2; top=r.y+(opt.sink||0)-(fy+1)/K; }
+        var sitK=(v.pose==="sit")? 4 : 0;   /* 座る形は椅子を描かない → ちびの座面より高いので少し沈める */
+        if(r.mid){ left=r.x-wU/2; top=r.y-hU/2; } else { var P0=v.pts||{}, fy=(P0.foot&&P0.foot[1]!=null)? P0.foot[1] : footOf(im,d); left=r.x-wU/2; top=r.y+(opt.sink||0)+sitK-(fy+1)/K; }
         var cut=(opt.clip!=null)? Math.max(0, (top+hU)-opt.clip) : 0;   /* 机の天板より下を切る */
         var box=document.createElement("div"); box.className="ekP"; box.style.cssText="position:absolute;left:"+pc(left,AW)+";top:"+pc(top,AH)+";width:"+pc(wU,AW)+";height:"+pc(hU,AH)+";opacity:0;transition:opacity .45s;pointer-events:none"+(flip? ";transform:scaleX(-1)" : "")+(cut>0? ";clip-path:inset(0 0 "+pc(cut,hU)+" 0)" : "");
         if(r.troph&&window.awxTrophyCv){ var Pt=v.pts||{}, hR=Pt.handR, hL=Pt.handL, hh=(hR&&hL)? ((hR[1]<=hL[1])? hR : hL) : (hR||hL), th=hh? [hh[0], hh[1], (Pt.head? Pt.head[0] : im.width/2), hh[1]] : handOf(im,d,true); if(th){ try{ var tv=window.awxTrophyCv(r.troph, EVPX.Cv), tS=S*((r.troph==="mvp")? 0.5 : 0.6) /* ちびに合わせた大きさなので、頭身の高い選手には 6 割 (MVP の杯は 5 割) */, tw=tv.w*tS, thh=tv.h*tS, /* MVP の杯は大きいので横断幕にかからないよう小さく */ tu=tv.url();
@@ -112229,18 +112291,26 @@ window._kfzOn=1;
             it.style.cssText="position:absolute;image-rendering:pixelated;left:"+pc(hp[0]/K-hw/2,wU)+";top:"+pc(hp[1]/K-hh2*gy,hU)+";width:"+pc(hw,wU)+";height:"+pc(hh2,hU)+";transform:rotate("+(90-(g==null? 90 : g)).toFixed(1)+"deg);transform-origin:50% "+(gy*100)+"%";
             box.appendChild(it); } }   /* 持ち物は選手の後ろ → 拳が重なって握って見える */
         var pi=document.createElement("img"); pi.src=im.src; pi.alt=""; pi.style.cssText="position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated"; box.appendChild(pi);
-        el.parentNode.insertBefore(box, el.nextSibling);
-        requestAnimationFrame(function(){ box.style.opacity="1"; });
+        if(opt.ghost){ box.dataset.op="0.55"; box.style.filter="brightness(1.3) saturate(0.6)"; }
+        if(r.css==="holo"){ box.style.filter="sepia(1) hue-rotate(150deg) saturate(2.2) brightness(1.25)"; box.dataset.op="0.72"; }   /* 培養槽のホログラム */
+        if(el) el.parentNode.insertBefore(box, el.nextSibling);
+        else { var inn=root.querySelector(".evIn"), bg=inn&&inn.querySelector("img.evpx"); if(inn) inn.insertBefore(box, bg? bg.nextSibling : inn.firstChild); }   /* 焼き込みの人 = 背景のすぐ上 */
+        requestAnimationFrame(function(){ box.style.opacity=box.dataset.op||"1"; });
       });
     }).catch(function(e){ swl(e); if(!root._ekDone){ root._ekDone=1; show(); } });
   }catch(e){ swl(e); } };
 
   /* 画面に入った目印付きの絵を見つけて差し替える (使い回しの HTML にも効く) */
   var scan=function(){ try{ var L=document.querySelectorAll("[data-ek]"); for(var i=0;i<L.length;i++) if(!L[i]._ekDone&&!L[i]._ekRun) fill(L[i]); }catch(e){ swl(e); } };
-  try{ var st=document.createElement("style"); st.textContent="[data-ek] .ekH{visibility:hidden!important}[data-ek].ekFail .ekH{visibility:visible!important}[data-ek] .ekOff{display:none!important}[data-ek].ekFail .ekOff{display:block!important}"; (document.head||document.documentElement).appendChild(st); }catch(e){ swl(e); }
+  try{ var st=document.createElement("style"); st.textContent="[data-ek] .ekH{visibility:hidden!important}[data-ek].ekFail .ekH{visibility:visible!important}[data-ek] .ekOff{display:none!important}"; (document.head||document.documentElement).appendChild(st); }catch(e){ swl(e); }
   try{ var mo=new MutationObserver(function(ms){ for(var i=0;i<ms.length;i++){ if(ms[i].addedNodes&&ms[i].addedNodes.length){ scan(); return; } } }); var go=function(){ if(document.body) mo.observe(document.body,{childList:true,subtree:true}); else setTimeout(go,200); }; go(); }catch(e){ swl(e); }
   window.kfxEvKit={ KS:KS, on:on, scan:scan };
-  wrap(); try{ setTimeout(wrap,0); setTimeout(wrap,1500); }catch(e){}
+  /* 空き地の場面などは作り置きの PNG (TC_ART) を出す → 部品の枠が使える時は、その場で描く方 (EVPX) にして差し替えを通す */
+  var wrapKfm=function(){ try{
+    if(typeof window.kfmScene!=="function"||window.kfmScene._kfEk) return;
+    var _k=window.kfmScene; var w2=function(title, pages){ try{ if(on()&&Array.isArray(pages)) arguments[1]=pages.map(function(pg){ return (pg&&pg.png&&pg.k&&EVPX.has&&EVPX.has(pg.k)&&ksOf(pg.k))? Object.assign({}, pg, {png:null}) : pg; }); }catch(e){ swl(e); } return _k.apply(this, arguments); };
+    for(var k in _k){ try{ w2[k]=_k[k]; }catch(e){} } w2._kfEk=1; window.kfmScene=w2; }catch(e){ swl(e); } };
+  wrap(); wrapKfm(); try{ setTimeout(function(){ wrap(); wrapKfm(); },0); setTimeout(function(){ wrap(); wrapKfm(); },1500); }catch(e){}
 }catch(e){ if(window.__swl) __swl(e); } })();
 /* ---- KFIX-ZI-96 投手から野手に転向した選手の2軍成績が NaN になる(10/27・正本 qa_tools/kfix_rt_zi_farmab.js)
    出荷ゲート⑭-f(世界監査・英語30年)で「[30年] 自軍 Takase 2軍: ab=NaN」。
@@ -113560,16 +113630,30 @@ window._kfzOn=1;
     if(!p) return Promise.resolve(null);
     var built=K.initFor(p, opt.with||null); if(!built) return Promise.resolve(null);
     var o=inPay(built.init.my,p); var lk=lookKey(o||{});
-    var key=[p.id, lk, opt.pose||"stand", opt.dir||"front", opt.h||160, opt.px||1, opt.t==null?"":opt.t, opt.with?opt.with.id:"", opt.cap||"", opt.staff||"", opt.owner? JSON.stringify(opt.owner) : "", opt.ppm||""].join("|");
+    var key=[p.id, lk, opt.pose||"stand", opt.dir||"front", opt.h||160, opt.px||1, opt.t==null?"":opt.t, opt.with?opt.with.id:"", opt.cap||"", opt.staff||"", opt.owner? JSON.stringify(opt.owner) : "", opt.press? JSON.stringify(opt.press) : "", opt.ppm||"", opt.expr||""].join("|");
     var hit=K.img[key]; if(hit&&hit.ver===K.ver) return Promise.resolve(hit);
     var msg={type:"sm-kit-player", init:built.init, team:"my", pid:p.id, name:p.name, pose:opt.pose||"stand", dir:opt.dir||"front", h:opt.h||160, px:opt.px||1};
-    if(opt.ppm){ msg.ppm=opt.ppm; if(!opt.h) delete msg.h; } /* 97g123 決まった縮尺 (1 m あたりのドット) → 背丈の差が出る */ if(opt.elev!=null) msg.elev=opt.elev; if(opt.t!=null) msg.t=opt.t; if(opt.n) msg.n=opt.n; if(opt.cap) msg.cap=opt.cap;
+    if(opt.expr) msg.expr=opt.expr; /* 11/22 表情 (Swing Maker に頼み中・来るまでは読み飛ばされる) */ if(opt.ppm){ msg.ppm=opt.ppm; if(!opt.h) delete msg.h; } /* 97g123 決まった縮尺 (1 m あたりのドット) → 背丈の差が出る */ if(opt.elev!=null) msg.elev=opt.elev; if(opt.t!=null) msg.t=opt.t; if(opt.n) msg.n=opt.n; if(opt.cap) msg.cap=opt.cap;
     if(opt.with){ msg.with={team:built.sameTeam?"my":"opp", pid:opt.with.id, name:opt.with.name}; }
-    if(opt.owner){ try{ msg.init=Object.assign({}, msg.init, {my:Object.assign({}, msg.init.my, {owner:opt.owner})}); }catch(eO){} } /* 背広の人の顔: 名前と年で変わる */
+    if(opt.owner){ try{ msg.init=Object.assign({}, msg.init, {my:Object.assign({}, msg.init.my, {owner:opt.owner})}); }catch(eO){} }
+    if(opt.press){ try{ msg.init=Object.assign({}, msg.init, {my:Object.assign({}, msg.init.my, {press:opt.press})}); }catch(eP){} } /* 記者の顔・男女・年 (97g123) */ /* 背広の人の顔: 名前と年で変わる */
     if(opt.staff){ msg.staff=opt.staff; delete msg.pid; delete msg.name; }
     return K.ask(msg, opt.ms).then(function(d){ if(!d||!d.ok){ note("ng", d&&d.why); return null; }
       var r={url:d.url, w:d.w, h:d.h, frames:d.frames||null, who:d.who||null, ver:K.ver, why:d.why||"", pts:d.pts||null, pts2:d.pts2||null, height:d.height||null, clip:!!d.clip}; /* 97g123 体の点 (頭・足もと・手・握る向き) と背丈 */ K.img[key]=r; return r; });
   };
+  /* 11/22 たーちゃんズの子ども (tc = ta hino ken yuu mi maa acchan tokkun yocchan shi kou nacchan)。試合 (tachanLiveGo) と同じ名簿を相手の球団として渡す */
+  var KIDI=null;
+  K.kidInit=function(){ if(KIDI) return KIDI; try{ if(!window.kfxKidsTeam) return null; var kt=kfxKidsTeam(); try{ assignPositions(kt); }catch(e0){}
+      var op=dry(function(){ return liveTeamPayload(kt, kt.name); }); if(!op) return null;
+      var tag=function(b){ var p=kt.players.find(function(x){ return x.name===b.name; }); if(p){ b.tc=p.tc; b.f4=p.f4; } };
+      [].concat(op.batters||[], op.bench||[], op.bullpen||[], [op.pitcher]).forEach(function(b){ if(b) tag(b); });
+      var me=(GM.team&&GM.team.players||[])[0]; var base=me? K.initFor(me) : null; if(!base) return null;
+      KIDI={ init:Object.assign({}, base.init, {opp:op, tachan:{mi:24, n:1}}), names:{} };
+      kt.players.forEach(function(p){ KIDI.names[p.tc]=p.name; }); return KIDI; }catch(e){ swl(e); return null; } };
+  K.kid=function(tc, opt){ opt=opt||{}; var I=K.kidInit(); if(!I||!I.names[tc]) return Promise.resolve(null);
+    var key=["kid",tc,opt.pose||"stand",opt.dir||"front",opt.ppm||"",opt.h||"",opt.expr||""].join("|"); var hit=K.img[key]; if(hit&&hit.ver===K.ver) return Promise.resolve(hit);
+    var msg={type:"sm-kit-player", init:I.init, team:"opp", name:I.names[tc], pose:opt.pose||"stand", dir:opt.dir||"front", px:1}; if(opt.ppm) msg.ppm=opt.ppm; else msg.h=opt.h||160; if(opt.expr) msg.expr=opt.expr;
+    return K.ask(msg, opt.ms).then(function(d){ if(!d||!d.ok) return null; var r2={url:d.url, w:d.w, h:d.h, pts:d.pts||null, height:d.height||null, ver:K.ver}; K.img[key]=r2; return r2; }); };
   K.stad=function(idx, time, opt){ opt=opt||{};
     var key=["stad",idx,time||"day",opt.w||1024,opt.h||576,opt.people?1:0,opt.fill==null?0.85:opt.fill].join("|");
     var hit=K.img[key]; if(hit&&hit.ver===K.ver) return Promise.resolve(hit);
