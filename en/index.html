@@ -15543,6 +15543,7 @@ function strikeout(m, pitcher, batter){
   if(m.animData){ m.animData.burst=" Strikeout!!"; m.animData.cls="big"; }
   addEvent(m, pitcher, "k");
   pitcher.stats.so++;
+  try{ if(batter&&batter.stats&&batter!==pitcher) batter.stats.so=(batter.stats.so||0)+1; }catch(eBs){} /*BATSO-1011*/
   pitcher.stats.outs++; try{ if(typeof m!=="undefined"&&m){ const _c8=fielderAt(defTeam(m),"C"); if(_c8&&_c8.stats) _c8.stats.cOuts=(_c8.stats.cOuts||0)+1; } }catch(e8){if(window.__swl)__swl(e8)}
   m.outs++;
   return endPA(m, "out");
