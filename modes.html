@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>100ペナ モード試験ランチャー</title>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#0b1018;color:#e8f0ff;font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+  main{max-width:760px;margin:0 auto;padding:22px 16px 40px}
+  h1{font-size:20px;margin:0 0 4px;color:#ffd766}
+  .sub{color:#9aa6bc;font-size:13px;margin-bottom:18px}
+  .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;background:#121a26;border:1px solid #223047;border-radius:12px;padding:12px 14px;margin-bottom:16px}
+  .opts label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#9aa6bc}
+  .opts select{font:800 14px system-ui,sans-serif;padding:7px 9px;border-radius:8px;border:1px solid #2c3d58;background:#0e141d;color:#fff}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  .card{background:#141c2a;border:1px solid #243450;border-radius:14px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:8px}
+  .card h2{margin:0;font-size:17px;display:flex;align-items:center;gap:8px}
+  .card .tag{font-size:11px;padding:2px 8px;border-radius:999px;background:#223047;color:#cdd6e6}
+  .card p{margin:0;font-size:13px;color:#b8c4d8}
+  .card p b{color:#ffd766}
+  .card a{margin-top:auto;display:block;text-align:center;text-decoration:none;font-weight:800;padding:10px 12px;border-radius:10px;background:#e9b949;color:#1a1206}
+  .card a.alt{background:#2b3b58;color:#e8f0ff}
+  .card.zen{border-color:#5a4a1a;background:#1a1810}
+  .note{margin-top:18px;font-size:13px;color:#9aa6bc;border-top:1px solid #223047;padding-top:12px}
+  .note code{background:#0e141d;padding:1px 6px;border-radius:6px;color:#cdd6e6}
+  ul{margin:6px 0 0;padding-left:18px}
+</style></head>
+<body><main>
+  <h1>100ペナ モード試験ランチャー</h1>
+  <div class="sub">試合だけ.html を、時代・変種ごとに手で遊ぶための入口。ボタンを押すと新しいタブで試合が始まる。</div>
+
+  <div class="opts">
+    <label>投球フォーム(自軍・敵軍の全投手)
+      <select id="pitform">
+        <option value="">自動(選手ごと)</option>
+        <option value="over">オーバー</option>
+        <option value="over2">始動型(ワインドアップ)</option>
+        <option value="over3">つま先立ち</option>
+        <option value="over4">大きな振りかぶり(新)</option>
+        <option value="over5">ハイキック(新)</option>
+        <option value="side">サイド</option>
+        <option value="under">アンダー</option>
+      </select></label>
+    <label>打撃フォーム(両軍の全打者)
+      <select id="batform">
+        <option value="">自動(選手ごと)</option>
+        <option value="0">標準</option>
+        <option value="1">天秤</option>
+        <option value="2">クラウチング</option>
+        <option value="3">神主</option>
+        <option value="4">オープン</option>
+        <option value="5">ノーステップ</option>
+        <option value="20">構えA(新)</option>
+        <option value="21">構えB(新)</option>
+        <option value="22">構えC(新)</option>
+      </select></label>
+    <label>本塁打調整(手動打撃の伸び)
+      <select id="hrman">
+        <option value="1">あり(v0.10.599の既定)</option>
+        <option value="0">なし(比較用・旧仕様)</option>
+      </select></label>
+    <label>自軍打者のパワーを一律に
+      <select id="power">
+        <option value="">そのまま</option>
+        <option value="60">60(並)</option>
+        <option value="75">75(主軸)</option>
+        <option value="90">90(大砲)</option>
+      </select></label>
+    <label>相手の球団(人外リーグの顔・新)
+      <select id="oppteam">
+        <option value="">東都ブレイズ(人・いつもの相手)</option>
+        <optgroup label="世界リーグ">
+          <option value="アマゾン・ヘッドハンターズ">アマゾン(豹・カエル・猿)</option>
+          <option value="セレンゲティ・サバンナーズ">セレンゲティ(獅子・象)</option>
+          <option value="パタゴニア・グレイシャーズ">パタゴニア(ペンギン)</option>
+          <option value="カリブ・バッカニアーズ">カリブ(海賊・ドクロ・半魚人)</option>
+          <option value="北極ホワイトアウツ">北極(シロクマ・雪だるま・ハスキー)</option>
+          <option value="アンデス・コンドルス">アンデス(アルパカ)</option>
+          <option value="ガンジス・ホーリーズ">ガンジス(象・虎)</option>
+          <option value="スカンジナビア・フィヨルズ">スカンジナビア(ヴァイキング)</option>
+        </optgroup>
+        <optgroup label="神話リーグ">
+          <option value="オリュンポス・オリンピアンズ">オリュンポス(全員英雄)</option>
+          <option value="アヴァロン・ラウンドテーブルズ">アヴァロン(騎士・首なし)</option>
+          <option value="ナイル・ファラオズ">ナイル(ファラオ・ミイラ・ジャッカル・胴面・ケルベロス)</option>
+          <option value="イースター・モアイズ">イースター(全員モアイ)</option>
+          <option value="ヴァルハラ・ラグナロクス">ヴァルハラ(ヴァイキング・三つ首・ケルベロス)</option>
+          <option value="大航海時代コンパスやろう">大航海時代(海賊・胴面・一つ目・双頭)</option>
+          <option value="アトランティス・リバイバルズ">アトランティス(半魚人・百目)</option>
+          <option value="桃源郷パラダイス">桃源郷(仙人・キンシコウ・パンダ・三つ目)</option>
+          <option value="ヒマラヤ・ゼニス">ヒマラヤ(雪男・三つ目)</option>
+          <option value="エルドラド・ゴールデンズ">エルドラド(黄金)</option>
+        </optgroup>
+        <optgroup label="極限リーグ">
+          <option value="竜巻街道ツイスターズ">竜巻街道(ヤンキー)</option>
+          <option value="賞味期限ギリギリーズ">賞味期限(おにぎり・食パン)</option>
+          <option value="深海トレンチーズ">深海(アンコウ・半魚人・タコ)</option>
+          <option value="月面工廠メカニクス">月面工廠(ロボ)</option>
+          <option value="雷雲キャッスルズ">雷雲(鬼)</option>
+          <option value="カルデラ・エラプションズ">カルデラ(溶岩・一つ目)</option>
+          <option value="地底マグマーズ">地底(溶岩・鬼・一つ目)</option>
+        </optgroup>
+        <optgroup label="宇宙リーグ">
+          <option value="暗黒物質ダークマターズ">暗黒物質(影・のっぺらぼう・百目)</option>
+          <option value="M理論イレブンス">M理論(双頭・三つ首・百目)</option>
+          <option value="イベントホライズンズ">イベントホライズン(ろくろ首・影)</option>
+          <option value="火星地下文明アサガオズ">火星地下文明(朝顔・タコ)</option>
+          <option value="土星リングサーファーズ">土星(宇宙飛行士)</option>
+          <option value="アンドロメダ遠征軍">アンドロメダ(宇宙人・ロボ)</option>
+        </optgroup>
+      </select></label>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h2>通常 <span class="tag">normal</span></h2>
+      <p>基準。<b>見るところ</b>: 投手の顔、空振り三振の振り抜き、三遊間の当たりを三塁手が捕った時に一塁へ投げるか。</p>
+      <a data-mode="normal" href="#">遊ぶ</a></div>
+    <div class="card"><h2>戦争編 <span class="tag">war</span></h2>
+      <p><b>見るところ</b>: 白い質素なユニと暗い色調、球種が和名(直球・曲球など)、打者コメントに外来語が残らないか。</p>
+      <a data-mode="war" href="#">遊ぶ</a></div>
+    <div class="card"><h2>アイドル編 <span class="tag">idol</span></h2>
+      <p><b>見るところ</b>: 相手のアピールタイムに応戦/黙殺の選択が出るか、劇場の額縁と紙吹雪、二塁なしの塁ダイヤ。</p>
+      <a data-mode="idol" href="#">遊ぶ</a></div>
+    <div class="card"><h2>超人編 <span class="tag">revolution</span></h2>
+      <p><b>見るところ</b>: 超人的な色調と本塁打の「超人アーチ」、吹き出しが打者カードに重ならないか。</p>
+      <a data-mode="revolution" href="#">遊ぶ</a></div>
+    <div class="card"><h2>塁3つ <span class="tag">bases3</span></h2>
+      <p><b>見るところ</b>: 三塁が無い(一塁→二塁→本塁)。走者の進み方、塁ダイヤの表示、三塁打が出ないこと。</p>
+      <a data-mode="bases3" href="#">遊ぶ</a></div>
+    <div class="card"><h2>野手7人 <span class="tag">fielders7</span></h2>
+      <p><b>見るところ</b>: 守備が7人で穴が広い。俯瞰の人数、ゴロが抜けやすいか、守備位置の呼び名。</p>
+      <a data-mode="fielders7" href="#">遊ぶ</a></div>
+    <div class="card zen"><h2>全ナメ挑戦 <span class="tag">本体</span></h2>
+      <p>本体を検証ブートで開き、自動で結団して全ナメシリーズへ直行する。ナメローとの会話の後にライブへ。<b>見るところ</b>: 相手投手ナメローの写真顔と黄ユニ、🐟の提案ダイアログ、攻守交代時の台詞の量。</p>
+      <a class="alt" href="index.html?zenname" target="_blank" rel="noopener">本体で開く</a></div>
+  </div>
+
+  <div class="note">
+    <b>使い方</b>
+    <ul>
+      <li>上の選択は、全モードのボタンに共通で付く(全ナメ挑戦は本体側の設定なので効かない)。</li>
+      <li>「相手の球団」を選ぶと、相手がその球団の名前になり、リーグ2以上の顔(犬・猫・英雄・ヤンキーなど)で出てくる。本編では世界リーグ以上に上がると同じ顔の相手と当たる。</li>
+      <li>試合中は右下の「フォーム:」ピルでも投球フォームを切り替えられる。左下に「試験: 戦争編」のように今のモードが出る。</li>
+      <li>URLを直接打つなら <code>試合だけ.html?mode=war&amp;pitform=under&amp;hrman=0&amp;power=90</code> の形。mode は normal / war / idol / revolution / bases3 / fielders7。</li>
+      <li>おかしい所を見つけたら、その画面のスクリーンショットと「何回の誰の打席か」を教えてもらえれば追える。</li>
+    </ul>
+  </div>
+</main>
+<script>
+  (function(){
+    const q=id=>document.getElementById(id);
+    /* Netlify では modes.html / live.html の ASCII 名で置く(スマホで日本語URLを打たずに済む)。手元では 試合だけ.html */
+    const LIVE=/modes\.html$/i.test(location.pathname)?'live_old.html':'試合だけ.html';
+    function build(mode){
+      const p=new URLSearchParams(); p.set('mode',mode);
+      const f=q('pitform').value; if(f) p.set('pitform',f);
+      const bf=q('batform').value; if(bf!=='') p.set('batform',bf);
+      if(q('hrman').value==='0') p.set('hrman','0');
+      const pw=q('power').value; if(pw) p.set('power',pw);
+      const ot=q('oppteam').value; if(ot) p.set('oppteam',ot);
+      return LIVE+'?'+p.toString();
+    }
+    document.querySelectorAll('a[data-mode]').forEach(a=>{
+      a.addEventListener('click',ev=>{ ev.preventDefault(); window.open(build(a.dataset.mode),'_blank','noopener'); });
+    });
+    /* 選択を覚える */
+    ['pitform','batform','hrman','power','oppteam'].forEach(id=>{ try{ const v=localStorage.getItem('modetest_'+id); if(v!=null) q(id).value=v; }catch(e){}
+      q(id).addEventListener('change',()=>{ try{ localStorage.setItem('modetest_'+id,q(id).value); }catch(e){} }); });
+  })();
+</script>
+</body></html>

@@ -1,7 +1,9 @@
 Swing Maker (100pena match screen)
-version: 版97g123
+version: 版97g200
 api: 1
-built: 2026-11-21 19:35
-bytes: 25680313
+built: 2026-11-28 14:53
+bytes: 18197735
+minified: yes
 recorded sounds: 48
+penasleep: 1
 contract: CONTRACT.md (pena-init / pena-result / pena-hello)

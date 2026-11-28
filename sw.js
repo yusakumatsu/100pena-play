@@ -1,10 +1,10 @@
 /* 100ペナ Service Worker(PWA): iPhone/Android のホーム画面に追加した時にオフラインでも起動できるようにする。
    方針: 本体(index.html)はネット優先(更新をすぐ反映)、落ちたらキャッシュ。書体・アイコンはキャッシュ優先。
-   0.10.769-mwrn34ur は配信時(deploy_netlify.js)に版で置き換わり、版が変わると古いキャッシュを捨てる。 */
-const VER = '0.10.769-mwrn34ur';
+   0.10.769-mx03xxrz は配信時(deploy_netlify.js)に版で置き換わり、版が変わると古いキャッシュを捨てる。 */
+const VER = '0.10.769-mx03xxrz';
 const CACHE = '100pena-' + VER;
 const PRECACHE = [
-  './', './index.html', './manifest.webmanifest',
+  './index.html', './manifest.webmanifest', /* 11/24 './' は外した (同じ 42MB を 2 回落としていた。ページはネット優先で、落ちた時は './index.html' を返す) */
   './fonts/fonts.css', './fonts/DotGothic16-Regular.ttf', './fonts/ZenKakuGothicNew-Regular.ttf', './fonts/ZenKakuGothicNew-Medium.ttf', './fonts/ZenKakuGothicNew-Bold.ttf',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'
 ];
